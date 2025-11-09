@@ -1,6 +1,5 @@
 -- Enable necessary extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+-- Note: gen_random_uuid() is used instead of gen_random_uuid() as it's built-in to PostgreSQL 13+
 
 -- Create custom types
 CREATE TYPE user_role AS ENUM ('BUYER', 'SELLER', 'ADMIN');
@@ -27,7 +26,7 @@ CREATE TABLE public.users (
 
 -- Addresses table
 CREATE TABLE public.addresses (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     street TEXT NOT NULL,
     city TEXT NOT NULL,
@@ -41,7 +40,7 @@ CREATE TABLE public.addresses (
 
 -- Seller profiles table
 CREATE TABLE public.seller_profiles (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID UNIQUE REFERENCES public.users(id) ON DELETE CASCADE,
     business_name TEXT NOT NULL,
     description TEXT,
@@ -58,7 +57,7 @@ CREATE TABLE public.seller_profiles (
 
 -- Products table
 CREATE TABLE public.products (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     seller_id UUID REFERENCES public.seller_profiles(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
@@ -78,7 +77,7 @@ CREATE TABLE public.products (
 
 -- Orders table
 CREATE TABLE public.orders (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     buyer_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
     seller_id UUID REFERENCES public.seller_profiles(id) ON DELETE SET NULL,
     status order_status DEFAULT 'PENDING',
@@ -96,7 +95,7 @@ CREATE TABLE public.orders (
 
 -- Order items table
 CREATE TABLE public.order_items (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     order_id UUID REFERENCES public.orders(id) ON DELETE CASCADE,
     product_id UUID REFERENCES public.products(id) ON DELETE SET NULL,
     quantity INTEGER NOT NULL,
@@ -106,7 +105,7 @@ CREATE TABLE public.order_items (
 
 -- Group purchases table
 CREATE TABLE public.group_purchases (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id UUID REFERENCES public.products(id) ON DELETE CASCADE,
     organizer_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
     title TEXT NOT NULL,
@@ -124,7 +123,7 @@ CREATE TABLE public.group_purchases (
 
 -- Group participants table
 CREATE TABLE public.group_participants (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     group_id UUID REFERENCES public.group_purchases(id) ON DELETE CASCADE,
     user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     quantity INTEGER NOT NULL,
@@ -134,7 +133,7 @@ CREATE TABLE public.group_participants (
 
 -- Reviews table
 CREATE TABLE public.reviews (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id UUID REFERENCES public.products(id) ON DELETE CASCADE,
     user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     rating INTEGER CHECK (rating >= 1 AND rating <= 5),
@@ -149,7 +148,7 @@ CREATE TABLE public.reviews (
 
 -- Forum categories table
 CREATE TABLE public.forum_categories (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT UNIQUE NOT NULL,
     description TEXT,
     icon TEXT,
@@ -159,7 +158,7 @@ CREATE TABLE public.forum_categories (
 
 -- Forum threads table
 CREATE TABLE public.forum_threads (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     category_id UUID REFERENCES public.forum_categories(id) ON DELETE CASCADE,
     author_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
     title TEXT NOT NULL,
@@ -175,7 +174,7 @@ CREATE TABLE public.forum_threads (
 
 -- Forum replies table
 CREATE TABLE public.forum_replies (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     thread_id UUID REFERENCES public.forum_threads(id) ON DELETE CASCADE,
     author_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
     content TEXT NOT NULL,
@@ -185,7 +184,7 @@ CREATE TABLE public.forum_replies (
 
 -- Conversations table
 CREATE TABLE public.conversations (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     participants UUID[] NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -193,7 +192,7 @@ CREATE TABLE public.conversations (
 
 -- Messages table
 CREATE TABLE public.messages (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     conversation_id UUID REFERENCES public.conversations(id) ON DELETE CASCADE,
     sender_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
     content TEXT NOT NULL,
@@ -203,7 +202,7 @@ CREATE TABLE public.messages (
 
 -- Notifications table
 CREATE TABLE public.notifications (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     type notification_type NOT NULL,
     title TEXT NOT NULL,
@@ -215,7 +214,7 @@ CREATE TABLE public.notifications (
 
 -- Payment methods table
 CREATE TABLE public.payment_methods (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     type TEXT NOT NULL,
     last4 TEXT NOT NULL,

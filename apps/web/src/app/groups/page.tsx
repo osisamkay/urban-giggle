@@ -2,18 +2,13 @@
 
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase/client';
-import { GroupsAPI } from '@sharesteak/api-client';
-import { Navbar } from '@/components/Navbar';
+import { groupsApi } from '@/lib/api';
 
 export default function GroupPurchasesPage() {
-  const groupsAPI = new GroupsAPI(supabase);
-
-  const { data, isLoading } = useQuery({
+  const { data: groups = [], isLoading } = useQuery({
     queryKey: ['groups'],
     queryFn: async () => {
-      const result = await groupsAPI.getActiveGroups();
-      return result.data;
+      return await groupsApi.getActiveGroups();
     },
   });
 
@@ -22,10 +17,9 @@ export default function GroupPurchasesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
+    <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gray-50">
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -42,9 +36,9 @@ export default function GroupPurchasesPage() {
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
           </div>
-        ) : data && data.items.length > 0 ? (
+        ) : groups && groups.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {data.items.map((group) => {
+            {groups.map((group: any) => {
               const progress = calculateProgress(
                 group.currentQuantity,
                 group.targetQuantity

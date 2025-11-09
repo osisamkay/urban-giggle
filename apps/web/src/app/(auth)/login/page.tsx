@@ -1,41 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase/client';
 import { useAuthStore } from '@/store/authStore';
-import { AuthAPI } from '@sharesteak/api-client';
 
 export default function LoginPage() {
   const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser);
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/products';
+
+  const { signIn, isLoading } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const authAPI = new AuthAPI(supabase);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
     try {
-      const result = await authAPI.signIn(email, password);
-
-      if (!result.success || !result.data) {
-        setError(result.error?.message || 'Login failed');
-        return;
-      }
-
-      setUser(result.data);
-      router.push('/products');
-    } catch (err) {
-      setError('An unexpected error occurred');
-    } finally {
-      setLoading(false);
+      await signIn(email, password);
+      router.push(redirect);
+    } catch (err: any) {
+      setError(err?.message || 'Invalid email or password');
     }
   };
 
@@ -111,10 +99,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isLoading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
       </div>

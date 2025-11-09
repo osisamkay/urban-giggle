@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useCartStore } from '@/store/cartStore';
-import { Navbar } from '@/components/Navbar';
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, getTotal } = useCartStore();
@@ -15,7 +14,6 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Your Cart is Empty
@@ -36,7 +34,6 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
 
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>

@@ -1,65 +1,73 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
+import { useState } from 'react';
 
 export function Navbar() {
+  const pathname = usePathname();
   const user = useAuthStore((state) => state.user);
   const itemCount = useCartStore((state) => state.getItemCount());
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const isActivePath = (path: string) => pathname === path;
+
+  const navLinks = [
+    { href: '/products', label: 'Products' },
+    { href: '/groups', label: 'Group Purchases' },
+    { href: '/community', label: 'Community' },
+  ];
+
+  if (user?.role === 'SELLER') {
+    navLinks.push({ href: '/seller/dashboard', label: 'Dashboard' });
+  }
+
+  if (user?.role === 'ADMIN') {
+    navLinks.push({ href: '/admin', label: 'Admin' });
+  }
 
   return (
-    <nav className="bg-white shadow-sm">
-      <div className="container mx-auto px-4">
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="text-2xl font-bold text-primary-600">
-            ShareSteak
+          <Link href="/" className="flex items-center flex-shrink-0">
+            <Image
+              src="/logos/original.png"
+              alt="ShareSteak Logo"
+              width={140}
+              height={48}
+              className="h-12 w-auto"
+              priority
+            />
           </Link>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/products"
-              className="text-gray-700 hover:text-primary-600 transition"
-            >
-              Products
-            </Link>
-            <Link
-              href="/groups"
-              className="text-gray-700 hover:text-primary-600 transition"
-            >
-              Group Purchases
-            </Link>
-            <Link
-              href="/community"
-              className="text-gray-700 hover:text-primary-600 transition"
-            >
-              Community
-            </Link>
-            {user?.role === 'SELLER' && (
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center space-x-1">
+            {navLinks.map((link) => (
               <Link
-                href="/seller/dashboard"
-                className="text-gray-700 hover:text-primary-600 transition"
+                key={link.href}
+                href={link.href}
+                className={`${
+                  isActivePath(link.href)
+                    ? 'text-meat-600 border-meat-600 font-semibold'
+                    : 'text-gray-700 hover:text-meat-600 border-transparent hover:border-meat-300'
+                } inline-flex items-center px-4 py-2 border-b-2 text-sm font-medium transition-all duration-200 hover:bg-meat-50/50 rounded-t-lg`}
               >
-                Seller Dashboard
+                {link.label}
               </Link>
-            )}
-            {user?.role === 'ADMIN' && (
-              <Link
-                href="/admin"
-                className="text-gray-700 hover:text-primary-600 transition"
-              >
-                Admin
-              </Link>
-            )}
+            ))}
           </div>
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
+            {/* Cart */}
             <Link
               href="/cart"
-              className="relative text-gray-700 hover:text-primary-600"
+              className="relative p-2 text-gray-700 hover:text-meat-600 transition-colors touch-target"
             >
               <svg
                 className="w-6 h-6"
@@ -75,46 +83,140 @@ export function Navbar() {
                 />
               </svg>
               {itemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                <span className="absolute top-0 right-0 bg-meat-600 text-white text-xs font-medium rounded-full w-5 h-5 flex items-center justify-center">
                   {itemCount}
                 </span>
               )}
             </Link>
 
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <Link
-                  href="/profile"
-                  className="text-gray-700 hover:text-primary-600"
-                >
-                  Profile
-                </Link>
-                <Link
-                  href="/orders"
-                  className="text-gray-700 hover:text-primary-600"
-                >
-                  Orders
-                </Link>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-4">
-                <Link
-                  href="/login"
-                  className="text-gray-700 hover:text-primary-600"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/signup"
-                  className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition"
-                >
-                  Sign Up
-                </Link>
-              </div>
-            )}
+            {/* User Menu - Desktop */}
+            <div className="hidden lg:flex items-center space-x-3">
+              {user ? (
+                <>
+                  <Link
+                    href="/orders"
+                    className="text-sm text-gray-700 hover:text-meat-600 transition-colors"
+                  >
+                    Orders
+                  </Link>
+                  <Link
+                    href="/profile"
+                    className="text-sm text-gray-700 hover:text-meat-600 transition-colors"
+                  >
+                    Profile
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-sm text-gray-700 hover:text-meat-600 transition-colors font-medium"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="bg-gradient-to-r from-meat-600 to-meat-700 text-white px-6 py-2 rounded-lg hover:from-meat-700 hover:to-meat-800 transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </div>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-md text-gray-700 hover:text-meat-600 hover:bg-gray-100 transition-colors touch-target"
+              aria-label="Toggle menu"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {mobileMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                )}
+              </svg>
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden border-t border-gray-200 bg-white">
+          <div className="px-4 py-3 space-y-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`${
+                  isActivePath(link.href)
+                    ? 'text-meat-600 bg-meat-50'
+                    : 'text-gray-700 hover:text-meat-600 hover:bg-gray-50'
+                } block px-3 py-3 rounded-md text-base font-medium transition-colors touch-target`}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            {/* Mobile user actions */}
+            <div className="pt-4 pb-2 border-t border-gray-200 space-y-1">
+              {user ? (
+                <>
+                  <Link
+                    href="/orders"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-meat-600 hover:bg-gray-50 transition-colors touch-target"
+                  >
+                    Orders
+                  </Link>
+                  <Link
+                    href="/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-meat-600 hover:bg-gray-50 transition-colors touch-target"
+                  >
+                    Profile
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-meat-600 hover:bg-gray-50 transition-colors touch-target"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-3 py-3 rounded-md text-base font-medium bg-meat-600 text-white hover:bg-meat-700 transition-colors touch-target text-center"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

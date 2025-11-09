@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase/client';
-import { ProductsAPI } from '@sharesteak/api-client';
-import type { ProductCategory } from '@sharesteak/types';
-import { Navbar } from '@/components/Navbar';
+import { productsApi } from '@/lib/api';
+
+type ProductCategory = 'BEEF' | 'PORK' | 'CHICKEN' | 'LAMB' | 'SEAFOOD' | 'GAME' | 'OTHER';
 
 const categories: ProductCategory[] = ['BEEF', 'PORK', 'CHICKEN', 'LAMB', 'SEAFOOD', 'GAME', 'OTHER'];
 
@@ -14,33 +13,20 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const productsAPI = new ProductsAPI(supabase);
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['products', selectedCategory],
+  const { data: products, isLoading } = useQuery({
+    queryKey: ['products', selectedCategory, searchQuery],
     queryFn: async () => {
-      const result = await productsAPI.getProducts({ category: selectedCategory });
-      return result.data;
+      return await productsApi.getProducts({
+        category: selectedCategory,
+        search: searchQuery || undefined,
+      });
     },
   });
-
-  const { data: searchResults } = useQuery({
-    queryKey: ['products-search', searchQuery],
-    queryFn: async () => {
-      if (!searchQuery) return null;
-      const result = await productsAPI.searchProducts(searchQuery);
-      return result.data;
-    },
-    enabled: searchQuery.length > 2,
-  });
-
-  const products = searchQuery ? searchResults : data?.items;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
+    <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gray-50">
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto  py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
@@ -93,7 +79,7 @@ export default function ProductsPage() {
           </div>
         ) : products && products.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
+            {products.map((product: any) => (
               <Link
                 key={product.id}
                 href={`/products/${product.id}`}

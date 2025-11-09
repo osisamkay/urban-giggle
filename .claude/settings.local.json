@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(pnpm install:*)",
+      "Bash(timeout 15 pnpm dev:*)",
+      "Bash(supabase status:*)",
+      "Bash(docker:*)",
+      "Bash(unzip:*)",
+      "Bash(mkdir:*)",
+      "Bash(supabase link:*)",
+      "Bash(supabase login:*)",
+      "Bash(supabase db push:*)",
+      "Bash(dir \"C:\\Users\\osisa\\Documents\\monorepo\\apps\\web\")",
+      "Bash(dir:*)",
+      "Bash(pnpm add:*)",
+      "Bash(\"c:\\Users\\osisa\\Documents\\urban-giggle\\apps\\web\\src\\lib\\supabase\\client.ts\")",
+      "Bash(pnpm build:*)",
+      "Bash(supabase start:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

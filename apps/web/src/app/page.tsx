@@ -1,48 +1,38 @@
 import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
+import { ModernHero } from '@/components/home/ModernHero';
+import { FeaturedProducts } from '@/components/home/FeaturedProducts';
+import { Testimonials } from '@/components/home/Testimonials';
+import { HowItWorks } from '@/components/home/HowItWorks';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-primary-50 to-white py-20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              Quality Meat, Direct from Producers
-            </h1>
-            <p className="text-xl text-gray-600 mb-8">
-              Join group purchases to unlock wholesale prices. Connect with
-              trusted producers. Build community around quality meat.
-            </p>
-            <div className="flex gap-4 justify-center">
-              <Link
-                href="/products"
-                className="bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition"
-              >
-                Browse Products
-              </Link>
-              <Link
-                href="/groups"
-                className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold border-2 border-primary-600 hover:bg-primary-50 transition"
-              >
-                Join Group Purchase
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+    <main>
+      {/* Modern Hero Section */}
+      <ModernHero />
+
+      {/* How It Works */}
+      <HowItWorks />
+
+      {/* Featured Products */}
+      <FeaturedProducts />
 
       {/* Features Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Why Choose ShareSteak?
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+      <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-white to-meat-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="text-3xl sm:text-4xl font-display font-bold text-gray-900 mb-4">
+              Why Choose ShareSteak?
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Experience a better way to buy quality meat with transparency, community, and savings.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+            <div className="text-center group bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="bg-meat-100 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-meat-600 transition-colors duration-300">
                 <svg
-                  className="w-8 h-8 text-primary-600"
+                  className="w-10 h-10 text-meat-600 group-hover:text-white transition-colors duration-300"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -55,16 +45,16 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Group Purchasing</h3>
+              <h3 className="text-xl font-display font-semibold text-gray-900 mb-3">Group Purchasing</h3>
               <p className="text-gray-600">
                 Join forces with other buyers to unlock wholesale prices and
-                better deals
+                better deals on premium quality meat.
               </p>
             </div>
-            <div className="text-center">
-              <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="text-center group bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="bg-meat-100 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-meat-600 transition-colors duration-300">
                 <svg
-                  className="w-8 h-8 text-primary-600"
+                  className="w-10 h-10 text-meat-600 group-hover:text-white transition-colors duration-300"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -77,18 +67,18 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">
+              <h3 className="text-xl font-display font-semibold text-gray-900 mb-3">
                 Verified Producers
               </h3>
               <p className="text-gray-600">
                 Every producer is verified with complete transparency on
-                sourcing and methods
+                sourcing, farming practices, and quality standards.
               </p>
             </div>
-            <div className="text-center">
-              <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="text-center group bg-white p-8 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="bg-meat-100 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-meat-600 transition-colors duration-300">
                 <svg
-                  className="w-8 h-8 text-primary-600"
+                  className="w-10 h-10 text-meat-600 group-hover:text-white transition-colors duration-300"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -101,31 +91,44 @@ export default function HomePage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Community Driven</h3>
+              <h3 className="text-xl font-display font-semibold text-gray-900 mb-3">Community Driven</h3>
               <p className="text-gray-600">
                 Connect with other meat enthusiasts, share recipes, and get
-                recommendations
+                trusted recommendations from real customers.
               </p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Testimonials */}
+      <Testimonials />
+
       {/* CTA Section */}
-      <section className="bg-primary-600 py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
+      <section className="relative bg-gradient-to-r from-meat-900 to-meat-700 py-16 sm:py-20 overflow-hidden">
+        {/* Decorative background */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10zm10 8c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm40 40c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }} />
+        </div>
+
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-display font-bold text-white mb-4">
             Ready to Get Started?
           </h2>
-          <p className="text-primary-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-meat-100 mb-8 max-w-2xl mx-auto">
             Join thousands of satisfied customers who are already enjoying
-            quality meat at better prices
+            quality meat at better prices through our marketplace.
           </p>
-          <Link
-            href="/signup"
-            className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition inline-block"
-          >
-            Create Free Account
+          <Link href="/signup">
+            <Button
+              variant="secondary"
+              size="lg"
+              className="bg-white text-meat-700 hover:bg-gray-100 shadow-xl"
+            >
+              Create Free Account
+            </Button>
           </Link>
         </div>
       </section>

@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { ForumsAPI } from '@sharesteak/api-client';
-import { Navbar } from '@/components/Navbar';
 
 export default function CommunityPage() {
   const forumsAPI = new ForumsAPI(supabase);
@@ -19,7 +18,6 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
 
       <div className="container mx-auto px-4 py-8">
         {/* Header */}

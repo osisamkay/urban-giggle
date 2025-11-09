@@ -5,10 +5,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase/client';
-import { ProductsAPI, ReviewsAPI } from '@sharesteak/api-client';
+import { productsApi } from '@/lib/api';
 import { useCartStore } from '@/store/cartStore';
-import { Navbar } from '@/components/Navbar';
 
 export default function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -16,22 +14,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const addItem = useCartStore((state) => state.addItem);
   const [quantity, setQuantity] = useState(1);
 
-  const productsAPI = new ProductsAPI(supabase);
-  const reviewsAPI = new ReviewsAPI(supabase);
-
   const { data: productData, isLoading: productLoading } = useQuery({
     queryKey: ['product', id],
     queryFn: async () => {
-      const result = await productsAPI.getProduct(id);
-      return result.data;
-    },
-  });
-
-  const { data: reviews } = useQuery({
-    queryKey: ['reviews', id],
-    queryFn: async () => {
-      const result = await reviewsAPI.getProductReviews(id);
-      return result.data;
+      return await productsApi.getProduct(id);
     },
   });
 
@@ -45,7 +31,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   if (productLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
@@ -58,7 +43,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   if (!productData) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12 text-gray-500">Product not found</div>
         </div>
@@ -68,7 +52,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
 
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
@@ -221,9 +204,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         {/* Reviews Section */}
         <div className="bg-white rounded-lg p-6">
           <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
-          {reviews && reviews.length > 0 ? (
+          {productData.reviews && productData.reviews.length > 0 ? (
             <div className="space-y-6">
-              {reviews.map((review) => (
+              {productData.reviews.map((review: any) => (
                 <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0">
                   <div className="flex items-start justify-between mb-2">
                     <div>
