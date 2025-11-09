@@ -10,13 +10,15 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="lg:col-span-1">
-            <Link href="/" className="inline-block mb-4">
+            <Link href="/" className="inline-block mb-4 group relative">
+              <div className="absolute -inset-2 bg-gradient-to-r from-meat-500/15 via-meat-600/15 to-meat-700/15 rounded-lg opacity-0 group-hover:opacity-100 blur transition-all duration-300"></div>
               <Image
                 src="/logos/original.png"
                 alt="ShareSteak Logo"
-                width={140}
-                height={48}
-                className="h-10 w-auto"
+                width={200}
+                height={70}
+                className="h-16 w-auto relative drop-shadow-[0_4px_12px_rgba(0,0,0,0.12)] group-hover:drop-shadow-[0_8px_16px_rgba(220,38,38,0.2)] transition-all duration-300 group-hover:scale-[1.06] saturate-110 brightness-105"
+                style={{ filter: 'contrast(1.15) saturate(1.1)' }}
               />
             </Link>
             <p className="text-sm text-gray-600 mb-4">

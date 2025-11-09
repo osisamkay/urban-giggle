@@ -16,7 +16,21 @@
       "Bash(pnpm add:*)",
       "Bash(\"c:\\Users\\osisa\\Documents\\urban-giggle\\apps\\web\\src\\lib\\supabase\\client.ts\")",
       "Bash(pnpm build:*)",
-      "Bash(supabase start:*)"
+      "Bash(supabase start:*)",
+      "Bash(supabase stop:*)",
+      "Bash(scoop update:*)",
+      "Bash(supabase --version:*)",
+      "Bash(pnpm dev)",
+      "Bash(timeout /t 10 /nobreak)",
+      "Bash(nul)",
+      "Bash(supabase db reset:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

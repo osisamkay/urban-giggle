@@ -32,16 +32,18 @@ export function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center flex-shrink-0">
+          <Link href="/" className="flex items-center flex-shrink-0 group relative">
+            <div className="absolute -inset-2 bg-gradient-to-r from-meat-500/20 via-meat-600/20 to-meat-700/20 rounded-xl opacity-0 group-hover:opacity-100 blur-lg transition-all duration-300"></div>
             <Image
               src="/logos/original.png"
               alt="ShareSteak Logo"
-              width={140}
-              height={48}
-              className="h-12 w-auto"
+              width={240}
+              height={80}
+              className="h-20 w-auto relative drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)] group-hover:drop-shadow-[0_12px_24px_rgba(220,38,38,0.25)] transition-all duration-300 group-hover:scale-[1.08] saturate-110 brightness-105"
               priority
+              style={{ filter: 'contrast(1.15) saturate(1.1)' }}
             />
           </Link>
 
