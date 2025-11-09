@@ -2,13 +2,12 @@
 -- This file sets up storage buckets and policies for the ShareSteak application
 
 -- Create storage buckets with compatible schema
-INSERT INTO storage.buckets (id, name, public)
+INSERT INTO storage.buckets (id, name)
 VALUES
-  ('products', 'products', true),
-  ('avatars', 'avatars', true),
-  ('content', 'content', true)
-ON CONFLICT (id) DO UPDATE SET
-  public = EXCLUDED.public;
+  ('products', 'products'),
+  ('avatars', 'avatars'),
+  ('content', 'content')
+ON CONFLICT (id) DO NOTHING;
 
 -- RLS is already enabled on storage.objects
 

@@ -29,6 +29,10 @@ CREATE POLICY "Public can view basic user info"
     ON public.users FOR SELECT
     USING (true);
 
+CREATE POLICY "Allow user creation during signup"
+    ON public.users FOR INSERT
+    WITH CHECK (auth.uid() = id);
+
 -- Addresses policies
 CREATE POLICY "Users can view their own addresses"
     ON public.addresses FOR SELECT
@@ -258,19 +262,5 @@ CREATE POLICY "Users can delete their own payment methods"
     ON public.payment_methods FOR DELETE
     USING (user_id = auth.uid());
 
--- Admin policies (users with ADMIN role can do everything)
-CREATE POLICY "Admins can do everything on users"
-    ON public.users FOR ALL
-    USING ((SELECT role FROM public.users WHERE id = auth.uid()) = 'ADMIN');
-
-CREATE POLICY "Admins can do everything on products"
-    ON public.products FOR ALL
-    USING ((SELECT role FROM public.users WHERE id = auth.uid()) = 'ADMIN');
-
-CREATE POLICY "Admins can do everything on orders"
-    ON public.orders FOR ALL
-    USING ((SELECT role FROM public.users WHERE id = auth.uid()) = 'ADMIN');
-
-CREATE POLICY "Admins can manage forum categories"
-    ON public.forum_categories FOR ALL
-    USING ((SELECT role FROM public.users WHERE id = auth.uid()) = 'ADMIN');
+-- Note: Admin policies are removed to prevent infinite recursion
+-- Instead, use service role key for admin operations or create a separate admin schema
