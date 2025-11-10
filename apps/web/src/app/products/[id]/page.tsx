@@ -51,9 +51,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen max-w-7xl mx-auto  bg-gray-50">
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-8 py-8">
         {/* Breadcrumb */}
         <div className="mb-6 text-sm text-gray-600">
           <Link href="/products" className="hover:text-primary-600">

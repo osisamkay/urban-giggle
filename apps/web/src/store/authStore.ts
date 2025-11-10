@@ -9,6 +9,7 @@ interface AuthState {
   isLoading: boolean;
   setUser: (user: User | null) => void;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signUp: (data: { email: string; password: string; firstName: string; lastName: string }) => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -36,6 +37,23 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      signInWithGoogle: async () => {
+        set({ isLoading: true });
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: `${window.location.origin}/auth/callback`,
+            },
+          });
+
+          if (error) throw error;
+        } catch (error) {
+          set({ isLoading: false });
+          throw error;
+        }
+      },
+
       signUp: async (data) => {
         set({ isLoading: true });
         try {
@@ -45,8 +63,9 @@ export const useAuthStore = create<AuthState>()(
             firstName: data.firstName,
             lastName: data.lastName,
           });
-          // Sign in after successful signup
-          await get().signIn(data.email, data.password);
+          // Fetch user profile after signup (already logged in by Supabase)
+          const userData = await authApi.getCurrentUserProfile();
+          set({ user: userData as User, isLoading: false });
         } catch (error) {
           set({ isLoading: false });
           throw error;

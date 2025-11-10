@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { productsApi } from '@/lib/api';
+import { useWishlistStore } from '@/store/wishlistStore';
+import { useAuthStore } from '@/store/authStore';
 
 type ProductCategory = 'BEEF' | 'PORK' | 'CHICKEN' | 'LAMB' | 'SEAFOOD' | 'GAME' | 'OTHER';
 
@@ -12,6 +14,14 @@ const categories: ProductCategory[] = ['BEEF', 'PORK', 'CHICKEN', 'LAMB', 'SEAFO
 export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory | undefined>();
   const [searchQuery, setSearchQuery] = useState('');
+  const user = useAuthStore((state) => state.user);
+  const { fetchWishlist, toggleWishlist, isInWishlist } = useWishlistStore();
+
+  useEffect(() => {
+    if (user) {
+      fetchWishlist();
+    }
+  }, [user, fetchWishlist]);
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['products', selectedCategory, searchQuery],
@@ -22,6 +32,23 @@ export default function ProductsPage() {
       });
     },
   });
+
+  const handleToggleWishlist = async (e: React.MouseEvent, productId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      // Redirect to login if not authenticated
+      window.location.href = '/login';
+      return;
+    }
+
+    try {
+      await toggleWishlist(productId);
+    } catch (error) {
+      console.error('Failed to toggle wishlist:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -85,7 +112,7 @@ export default function ProductsPage() {
                 href={`/products/${product.id}`}
                 className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden"
               >
-                <div className="aspect-square bg-gray-200 relative">
+                <div className="aspect-square bg-gray-200 relative group">
                   {product.images && product.images.length > 0 ? (
                     <img
                       src={product.images[0]}
@@ -97,9 +124,32 @@ export default function ProductsPage() {
                       No Image
                     </div>
                   )}
-                  <div className="absolute top-2 right-2 bg-primary-600 text-white px-2 py-1 rounded text-sm">
+                  <div className="absolute top-2 left-2 bg-primary-600 text-white px-2 py-1 rounded text-sm">
                     {product.category}
                   </div>
+                  {/* Wishlist button */}
+                  <button
+                    onClick={(e) => handleToggleWishlist(e, product.id)}
+                    className={`absolute top-2 right-2 w-9 h-9 rounded-full shadow-md flex items-center justify-center transition-all ${
+                      isInWishlist(product.id)
+                        ? 'bg-meat-600 text-white scale-100'
+                        : 'bg-white text-gray-600 hover:bg-meat-50 opacity-0 group-hover:opacity-100'
+                    }`}
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill={isInWishlist(product.id) ? 'currentColor' : 'none'}
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      />
+                    </svg>
+                  </button>
                 </div>
                 <div className="p-4">
                   <h3 className="font-semibold text-lg text-gray-900 mb-1">

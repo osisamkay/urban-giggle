@@ -10,8 +10,18 @@ import { useState } from 'react';
 export function Navbar() {
   const pathname = usePathname();
   const user = useAuthStore((state) => state.user);
+  const signOut = useAuthStore((state) => state.signOut);
   const itemCount = useCartStore((state) => state.getItemCount());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setMobileMenuOpen(false);
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
 
   const isActivePath = (path: string) => pathname === path;
 
@@ -35,13 +45,13 @@ export function Navbar() {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center flex-shrink-0 group relative">
-            <div className="absolute -inset-2 bg-gradient-to-r from-meat-500/20 via-meat-600/20 to-meat-700/20 rounded-xl opacity-0 group-hover:opacity-100 blur-lg transition-all duration-300"></div>
+            <div className="absolute -inset-2 group-hover:opacity-100 blur-lg transition-all duration-300"></div>
             <Image
-              src="/logos/original.png"
+              src="/logos/monochrome-transparent.png"
               alt="ShareSteak Logo"
               width={240}
               height={80}
-              className="h-20 w-auto relative drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)] group-hover:drop-shadow-[0_12px_24px_rgba(220,38,38,0.25)] transition-all duration-300 group-hover:scale-[1.08] saturate-110 brightness-105"
+              className="h-[4rem] w-auto relative  transition-all duration-300 group-hover:scale-[1.08] saturate-110 brightness-105"
               priority
               style={{ filter: 'contrast(1.15) saturate(1.1)' }}
             />
@@ -107,6 +117,12 @@ export function Navbar() {
                   >
                     Profile
                   </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="text-sm text-gray-700 hover:text-meat-600 transition-colors font-medium"
+                  >
+                    Logout
+                  </button>
                 </>
               ) : (
                 <>
@@ -196,6 +212,12 @@ export function Navbar() {
                   >
                     Profile
                   </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full text-left px-3 py-3 rounded-md text-base font-medium text-gray-700 hover:text-meat-600 hover:bg-gray-50 transition-colors touch-target"
+                  >
+                    Logout
+                  </button>
                 </>
               ) : (
                 <>

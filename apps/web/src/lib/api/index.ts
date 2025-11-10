@@ -5,3 +5,4 @@ export { ordersApi } from './orders';
 export { groupsApi } from './groups';
 export { notificationsApi } from './notifications';
 export { addressesApi } from './addresses';
+export { wishlistApi } from './wishlist';
