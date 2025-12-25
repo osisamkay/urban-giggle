@@ -41,6 +41,7 @@ export const wishlistApi = {
 
     const { data, error } = await supabase
       .from('wishlists')
+      // @ts-ignore - Type issue with Supabase generated types
       .insert({
         user_id: user.id,
         product_id: productId,

@@ -72,7 +72,7 @@ export default function NotificationsPage() {
 
   const unreadCount = allNotifications.filter((notif: any) => !notif.read).length;
 
-  const getNotificationIcon = (type: Notification['type']) => {
+  const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'order':
         return (
@@ -107,7 +107,7 @@ export default function NotificationsPage() {
     }
   };
 
-  const getNotificationColor = (type: Notification['type']) => {
+  const getNotificationColor = (type: string) => {
     switch (type) {
       case 'order':
         return 'bg-blue-100 text-blue-600';
@@ -202,7 +202,7 @@ export default function NotificationsPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredNotifications.map((notification) => (
+            {filteredNotifications.map((notification: any) => (
               <div
                 key={notification.id}
                 className={`bg-white rounded-xl shadow-md p-4 transition-all ${

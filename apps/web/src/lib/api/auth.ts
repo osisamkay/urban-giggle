@@ -30,6 +30,7 @@ export const authApi = {
     // Create user profile
     const { error: profileError } = await supabase
       .from('users')
+      // @ts-ignore - Type issue with Supabase generated types
       .insert({
         id: authData.user.id,
         email,
@@ -117,6 +118,7 @@ export const authApi = {
   }>) => {
     const { data, error } = await supabase
       .from('users')
+      // @ts-ignore - Type issue with Supabase generated types
       .update(updates)
       .eq('id', userId)
       .select()

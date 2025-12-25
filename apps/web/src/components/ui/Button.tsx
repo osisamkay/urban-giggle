@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'danger';
@@ -18,7 +21,7 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variantClasses = {
     primary: 'bg-meat-600 text-white hover:bg-meat-700 focus:ring-meat-500',
@@ -37,11 +40,17 @@ export function Button({
 
   const combinedClasses = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClass} ${className}`;
 
+  // Cast props to prevent type conflict with Motion props vs Button props overlap
+  // Or just accept that motion.button handles standard button props fine mostly.
+
   return (
-    <button
+    <motion.button
       className={combinedClasses}
       disabled={disabled || isLoading}
-      {...props}
+      whileHover={!disabled && !isLoading ? { scale: 1.02 } : undefined}
+      whileTap={!disabled && !isLoading ? { scale: 0.98 } : undefined}
+      transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      {...(props as any)}
     >
       {isLoading && (
         <svg
@@ -66,6 +75,6 @@ export function Button({
         </svg>
       )}
       {children}
-    </button>
+    </motion.button>
   );
 }

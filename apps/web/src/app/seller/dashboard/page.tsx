@@ -12,12 +12,12 @@ export default function SellerDashboardPage() {
   useEffect(() => {
     if (!user) {
       router.push('/login');
-    } else if (user.role !== 'PRODUCER') {
+    } else if (user.role !== 'SELLER') {
       router.push('/dashboard');
     }
   }, [user, router]);
 
-  if (!user || user.role !== 'PRODUCER') {
+  if (!user || user.role !== 'SELLER') {
     return null;
   }
 

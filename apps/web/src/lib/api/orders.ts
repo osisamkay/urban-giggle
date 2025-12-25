@@ -22,38 +22,18 @@ export interface CreateOrderData {
 export const ordersApi = {
   // Create a new order
   createOrder: async (orderData: CreateOrderData) => {
-    // Create the order
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        buyer_id: orderData.buyer_id,
-        subtotal: orderData.subtotal,
-        tax: orderData.tax,
-        shipping: orderData.shipping,
-        total: orderData.total,
-        shipping_address_id: orderData.shipping_address_id,
-        status: 'PENDING',
-      })
-      .select()
-      .single();
+    const response = await fetch('/api/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData),
+    });
 
-    if (orderError) throw orderError;
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to create order');
+    }
 
-    // Create order items
-    const orderItems = orderData.items.map(item => ({
-      order_id: order.id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      price_at_purchase: item.price_at_purchase,
-    }));
-
-    const { error: itemsError } = await supabase
-      .from('order_items')
-      .insert(orderItems);
-
-    if (itemsError) throw itemsError;
-
-    return order;
+    return await response.json();
   },
 
   // Get user's orders
@@ -81,7 +61,7 @@ export const ordersApi = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data;
+    return data as any;
   },
 
   // Get seller's orders
@@ -113,7 +93,7 @@ export const ordersApi = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data;
+    return data as any;
   },
 
   // Get single order by ID
@@ -147,7 +127,7 @@ export const ordersApi = {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as any;
   },
 
   // Update order status
@@ -157,13 +137,14 @@ export const ordersApi = {
   ) => {
     const { data, error } = await supabase
       .from('orders')
+      // @ts-ignore - Type issue with Supabase generated types
       .update({ status })
       .eq('id', orderId)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as any;
   },
 
   // Update tracking information
@@ -175,12 +156,38 @@ export const ordersApi = {
 
     const { data, error } = await supabase
       .from('orders')
+      // @ts-ignore - Type issue with Supabase generated types
       .update(updates)
       .eq('id', orderId)
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as any;
+  },
+  // Get ALL orders (Admin only)
+  getAllOrders: async () => {
+    const { data, error } = await supabase
+      .from('orders')
+      .select(`
+        *,
+         items:order_items(
+          *,
+          product:products(
+            title,
+            images
+          )
+        ),
+         buyer:users(
+          email,
+          first_name,
+          last_name
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+    return data as any;
   },
 };

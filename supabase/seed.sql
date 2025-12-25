@@ -21,13 +21,15 @@ TRUNCATE TABLE public.users CASCADE;
 INSERT INTO auth.users (id, email) VALUES
   ('10000000-0000-0000-0000-000000000001', 'seller1@sharesteak.com'),
   ('10000000-0000-0000-0000-000000000002', 'seller2@sharesteak.com'),
-  ('10000000-0000-0000-0000-000000000003', 'buyer1@sharesteak.com')
+  ('10000000-0000-0000-0000-000000000003', 'buyer1@sharesteak.com'),
+  ('10000000-0000-0000-0000-000000000004', 'admin@sharesteak.com')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.users (id, email, role, first_name, last_name, email_verified) VALUES
   ('10000000-0000-0000-0000-000000000001', 'seller1@sharesteak.com', 'SELLER', 'John', 'Ranch', true),
   ('10000000-0000-0000-0000-000000000002', 'seller2@sharesteak.com', 'SELLER', 'Mary', 'Farm', true),
-  ('10000000-0000-0000-0000-000000000003', 'buyer1@sharesteak.com', 'BUYER', 'Bob', 'Customer', true)
+  ('10000000-0000-0000-0000-000000000003', 'buyer1@sharesteak.com', 'BUYER', 'Bob', 'Customer', true),
+  ('10000000-0000-0000-0000-000000000004', 'admin@sharesteak.com', 'ADMIN', 'Super', 'Admin', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================

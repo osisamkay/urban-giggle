@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 import { useState } from 'react';
+import NotificationsDropdown from './NotificationsDropdown';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -63,11 +64,10 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`${
-                  isActivePath(link.href)
-                    ? 'text-meat-600 border-meat-600 font-semibold'
-                    : 'text-gray-700 hover:text-meat-600 border-transparent hover:border-meat-300'
-                } inline-flex items-center px-4 py-2 border-b-2 text-sm font-medium transition-all duration-200 hover:bg-meat-50/50 rounded-t-lg`}
+                className={`${isActivePath(link.href)
+                  ? 'text-meat-600 border-meat-600 font-semibold'
+                  : 'text-gray-700 hover:text-meat-600 border-transparent hover:border-meat-300'
+                  } inline-flex items-center px-4 py-2 border-b-2 text-sm font-medium transition-all duration-200 hover:bg-meat-50/50 rounded-t-lg`}
               >
                 {link.label}
               </Link>
@@ -76,6 +76,7 @@ export function Navbar() {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
+            <NotificationsDropdown />
             {/* Cart */}
             <Link
               href="/cart"
@@ -184,11 +185,10 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`${
-                  isActivePath(link.href)
-                    ? 'text-meat-600 bg-meat-50'
-                    : 'text-gray-700 hover:text-meat-600 hover:bg-gray-50'
-                } block px-3 py-3 rounded-md text-base font-medium transition-colors touch-target`}
+                className={`${isActivePath(link.href)
+                  ? 'text-meat-600 bg-meat-50'
+                  : 'text-gray-700 hover:text-meat-600 hover:bg-gray-50'
+                  } block px-3 py-3 rounded-md text-base font-medium transition-colors touch-target`}
               >
                 {link.label}
               </Link>

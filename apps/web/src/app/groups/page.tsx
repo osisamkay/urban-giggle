@@ -1,8 +1,11 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useQuery } from '@tanstack/react-query';
 import { groupsApi } from '@/lib/api';
+import { calculateSharePercentage, formatShare, SHARE_SIZES } from '@/lib/ShareCalculator';
+import type { GroupPurchase } from '@sharesteak/types';
 
 export default function GroupPurchasesPage() {
   const { data: groups = [], isLoading } = useQuery({
@@ -12,10 +15,6 @@ export default function GroupPurchasesPage() {
     },
   });
 
-  const calculateProgress = (current: number, target: number) => {
-    return Math.min((current / target) * 100, 100);
-  };
-
   return (
     <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-gray-50">
 
@@ -23,11 +22,10 @@ export default function GroupPurchasesPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Group Purchases
+            Group Sharing Opportunities
           </h1>
           <p className="text-gray-600">
-            Join group purchases to unlock better prices through collective buying
-            power
+            Join neighbors to buy premium meat in bulk. Reserve your share (fractional or bulk) and unlock wholesale pricing.
           </p>
         </div>
 
@@ -38,36 +36,38 @@ export default function GroupPurchasesPage() {
           </div>
         ) : groups && groups.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {groups.map((group: any) => {
-              const progress = calculateProgress(
-                group.currentQuantity,
-                group.targetQuantity
-              );
-              const daysRemaining = Math.ceil(
+            {groups.map((group: GroupPurchase) => {
+              const category = group.product?.category || 'BEEF';
+              const progress = calculateSharePercentage(group.currentQuantity, group.targetQuantity);
+              const daysRemaining = Math.max(0, Math.ceil(
                 (new Date(group.deadline).getTime() - Date.now()) /
-                  (1000 * 60 * 60 * 24)
-              );
+                (1000 * 60 * 60 * 24)
+              ));
 
               return (
                 <Link
                   key={group.id}
                   href={`/groups/${group.id}`}
-                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden"
+                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden group"
                 >
                   {/* Product Image */}
-                  <div className="aspect-video bg-gray-200 relative">
+                  <div className="aspect-video bg-gray-200 relative overflow-hidden">
                     {group.product?.images && group.product.images.length > 0 ? (
-                      <img
+                      <Image
                         src={group.product.images[0]}
                         alt={group.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover transform group-hover:scale-105 transition duration-500"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        No Image
-                      </div>
+                      <Image
+                        src="/images/hero-1.png"
+                        alt={group.title}
+                        fill
+                        className="object-cover transform group-hover:scale-105 transition duration-500 opacity-90"
+                      />
                     )}
-                    <div className="absolute top-2 right-2 bg-primary-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    <div className="absolute top-2 right-2 bg-primary-600 text-white px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
                       {daysRemaining}d left
                     </div>
                   </div>
@@ -83,14 +83,14 @@ export default function GroupPurchasesPage() {
                     {/* Progress Bar */}
                     <div className="mb-4">
                       <div className="flex justify-between text-sm text-gray-600 mb-1">
-                        <span>{group.participantCount} participants</span>
-                        <span>
-                          {group.currentQuantity}/{group.targetQuantity} units
+                        <span>{group.participantCount} neighbors joined</span>
+                        <span className="font-medium text-primary-700">
+                          {formatShare(group.currentQuantity, category)} Sold
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-gray-200 rounded-full h-3">
                         <div
-                          className="bg-green-500 h-2 rounded-full transition-all"
+                          className="bg-green-500 h-3 rounded-full transition-all shadow-[0_0_10px_rgba(34,197,94,0.5)]"
                           style={{ width: `${progress}%` }}
                         ></div>
                       </div>
@@ -98,36 +98,24 @@ export default function GroupPurchasesPage() {
 
                     {/* Pricing Tiers */}
                     <div className="space-y-2 mb-4">
-                      {group.priceTiers.slice(0, 2).map((tier, idx) => (
-                        <div
-                          key={idx}
-                          className={`text-sm px-3 py-2 rounded ${
-                            group.currentQuantity >= tier.minQuantity
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-600'
-                          }`}
-                        >
-                          <div className="flex justify-between">
-                            <span>{tier.minQuantity}+ units</span>
-                            <span className="font-semibold">
-                              ${tier.pricePerUnit.toFixed(2)}
-                              {tier.discountPercentage > 0 && (
-                                <span className="ml-1 text-xs">
-                                  (-{tier.discountPercentage}%)
-                                </span>
-                              )}
-                            </span>
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Available Options</div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {/* Show 1/16 and 1/4 specifically if available, or just first two */}
+                        {group.priceTiers.slice(0, 2).map((tier: any, idx: number) => (
+                          <div key={idx} className="bg-gray-50 rounded p-2 text-center border border-gray-100">
+                            <div className="text-sm font-bold text-gray-900">{formatShare(tier.minQuantity, category)}</div>
+                            <div className="text-green-600 font-medium">${tier.pricePerUnit.toFixed(2)}</div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mt-4">
                       <div className="text-sm text-gray-600">
-                        Organized by {group.organizer?.firstName || 'Anonymous'}
+                        Organized by <span className="font-medium text-gray-900">{group.organizer?.firstName || 'Local Farmer'}</span>
                       </div>
-                      <div className="bg-primary-600 text-white px-4 py-2 rounded text-sm font-semibold">
-                        Join Group
+                      <div className="bg-primary-600 text-white px-4 py-2 rounded text-sm font-semibold hover:bg-primary-700 transition">
+                        Reserve Share
                       </div>
                     </div>
                   </div>
@@ -142,7 +130,7 @@ export default function GroupPurchasesPage() {
               href="/groups/create"
               className="inline-block bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition"
             >
-              Create Group Purchase
+              Start a Group Buy
             </Link>
           </div>
         )}

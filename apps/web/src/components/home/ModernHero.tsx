@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 
 const heroImages = [
-  '/images/hero-1.jpg',
-  '/images/hero-2.jpg',
-  '/images/hero-3.jpg',
-  '/images/hero-4.jpg',
+  '/images/hero-1.png',
+  '/images/hero-2.png',
+  '/images/hero-3.png',
+  '/images/hero-4.png',
 ];
 
 const container = {
@@ -164,36 +164,25 @@ export function ModernHero() {
             className="relative h-[400px] sm:h-[500px] lg:h-[600px]"
           >
             <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
-              {/* Placeholder for now - you can add actual images */}
               <motion.div
                 key={currentImageIndex}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
-                className="absolute inset-0 bg-gradient-to-br from-meat-500 to-meat-700 flex items-center justify-center"
+                className="absolute inset-0"
               >
-                <div className="text-center text-white">
-                  <svg
-                    className="w-32 h-32 mx-auto mb-4 opacity-50"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  <p className="text-lg opacity-75">Premium Quality Meat</p>
-                </div>
-              </motion.div>
+                <Image
+                  src={heroImages[currentImageIndex]}
+                  alt="Premium Meat Marketplace"
+                  fill
+                  className="object-cover"
+                  priority
+                />
 
-              {/* Decorative elements */}
-              <div className="absolute -top-6 -right-6 w-32 h-32 bg-meat-accent rounded-full opacity-20 blur-2xl" />
-              <div className="absolute -bottom-6 -left-6 w-40 h-40 bg-meat-600 rounded-full opacity-10 blur-2xl" />
+                {/* Overlay gradient for text readability if needed */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              </motion.div>
             </div>
 
             {/* Carousel indicators */}
@@ -202,11 +191,10 @@ export function ModernHero() {
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentImageIndex
-                      ? 'w-8 bg-meat-600'
-                      : 'w-2 bg-meat-300 hover:bg-meat-400'
-                  }`}
+                  className={`h-2 rounded-full transition-all ${index === currentImageIndex
+                    ? 'w-8 bg-meat-600'
+                    : 'w-2 bg-meat-300 hover:bg-meat-400'
+                    }`}
                   aria-label={`Go to slide ${index + 1}`}
                 />
               ))}

@@ -4,6 +4,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { wishlistApi } from '@/lib/api';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
@@ -51,17 +52,7 @@ export default function WishlistPage() {
   };
 
   const handleAddToCart = (product: any) => {
-    addItem({
-      productId: product.id,
-      quantity: 1,
-      product: {
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        images: product.images,
-        unit: product.unit,
-      },
-    });
+    addItem(product, 1);
   };
 
   return (
@@ -125,12 +116,13 @@ export default function WishlistPage() {
                   className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-xl transition-shadow"
                 >
                   <div className="relative">
-                    <div className="aspect-square bg-gray-200">
+                    <div className="aspect-square bg-gray-200 relative">
                       {product.images && product.images.length > 0 ? (
-                        <img
+                        <Image
                           src={product.images[0]}
                           alt={product.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">

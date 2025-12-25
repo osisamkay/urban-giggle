@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { productsApi } from '@/lib/api';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export default function SellerProductsPage() {
@@ -12,6 +13,18 @@ export default function SellerProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive' | 'draft'>('all');
+
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true);
+      const data = await productsApi.getSellerProducts(user!.id);
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -25,19 +38,8 @@ export default function SellerProductsPage() {
     }
 
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, router]);
-
-  const fetchProducts = async () => {
-    try {
-      setIsLoading(true);
-      const data = await productsApi.getSellerProducts(user!.id);
-      setProducts(data || []);
-    } catch (error) {
-      console.error('Failed to fetch products:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleDelete = async (productId: string) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
@@ -105,9 +107,8 @@ export default function SellerProductsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <button
             onClick={() => setFilter('all')}
-            className={`bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow ${
-              filter === 'all' ? 'ring-2 ring-meat-600' : ''
-            }`}
+            className={`bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow ${filter === 'all' ? 'ring-2 ring-meat-600' : ''
+              }`}
           >
             <p className="text-sm text-gray-600 mb-1">Total Products</p>
             <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
@@ -115,9 +116,8 @@ export default function SellerProductsPage() {
 
           <button
             onClick={() => setFilter('active')}
-            className={`bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow ${
-              filter === 'active' ? 'ring-2 ring-meat-600' : ''
-            }`}
+            className={`bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow ${filter === 'active' ? 'ring-2 ring-meat-600' : ''
+              }`}
           >
             <p className="text-sm text-gray-600 mb-1">Active</p>
             <p className="text-3xl font-bold text-green-600">{stats.active}</p>
@@ -125,9 +125,8 @@ export default function SellerProductsPage() {
 
           <button
             onClick={() => setFilter('inactive')}
-            className={`bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow ${
-              filter === 'inactive' ? 'ring-2 ring-meat-600' : ''
-            }`}
+            className={`bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow ${filter === 'inactive' ? 'ring-2 ring-meat-600' : ''
+              }`}
           >
             <p className="text-sm text-gray-600 mb-1">Inactive</p>
             <p className="text-3xl font-bold text-gray-600">{stats.inactive}</p>
@@ -135,9 +134,8 @@ export default function SellerProductsPage() {
 
           <button
             onClick={() => setFilter('draft')}
-            className={`bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow ${
-              filter === 'draft' ? 'ring-2 ring-meat-600' : ''
-            }`}
+            className={`bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow ${filter === 'draft' ? 'ring-2 ring-meat-600' : ''
+              }`}
           >
             <p className="text-sm text-gray-600 mb-1">Drafts</p>
             <p className="text-3xl font-bold text-orange-600">{stats.draft}</p>
@@ -182,12 +180,13 @@ export default function SellerProductsPage() {
               >
                 <div className="flex gap-6">
                   {/* Product Image */}
-                  <div className="w-32 h-32 flex-shrink-0 bg-gray-200 rounded-lg overflow-hidden">
+                  <div className="w-32 h-32 flex-shrink-0 bg-gray-200 rounded-lg overflow-hidden relative">
                     {product.images && product.images.length > 0 ? (
-                      <img
+                      <Image
                         src={product.images[0]}
                         alt={product.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -211,13 +210,12 @@ export default function SellerProductsPage() {
                         <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
                       </div>
                       <span
-                        className={`ml-4 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
-                          product.status === 'ACTIVE'
+                        className={`ml-4 px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${product.status === 'ACTIVE'
                             ? 'bg-green-100 text-green-800'
                             : product.status === 'INACTIVE'
-                            ? 'bg-gray-100 text-gray-800'
-                            : 'bg-orange-100 text-orange-800'
-                        }`}
+                              ? 'bg-gray-100 text-gray-800'
+                              : 'bg-orange-100 text-orange-800'
+                          }`}
                       >
                         {product.status}
                       </span>
@@ -254,11 +252,10 @@ export default function SellerProductsPage() {
                       </Link>
                       <button
                         onClick={() => handleStatusToggle(product.id, product.status)}
-                        className={`px-4 py-2 rounded-lg font-medium text-sm ${
-                          product.status === 'ACTIVE'
+                        className={`px-4 py-2 rounded-lg font-medium text-sm ${product.status === 'ACTIVE'
                             ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             : 'bg-green-100 text-green-700 hover:bg-green-200'
-                        }`}
+                          }`}
                       >
                         {product.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
                       </button>

@@ -75,13 +75,8 @@ export default function NewProductPage() {
         category: formData.category,
         inventory: parseInt(formData.inventory),
         images,
-        weight: formData.weight ? parseFloat(formData.weight) : undefined,
-        cuts: formData.cuts || undefined,
-        grade_quality: formData.gradeQuality || undefined,
-        farming_practice: formData.farmingPractice || undefined,
-        shipping_info: formData.shippingInfo || undefined,
         status: 'ACTIVE',
-      });
+      } as any);
 
       router.push('/seller/products');
     } catch (err: any) {

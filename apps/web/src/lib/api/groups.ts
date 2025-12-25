@@ -26,7 +26,7 @@ export const groupsApi = {
       .order('deadline', { ascending: true });
 
     if (error) throw error;
-    return data;
+    return data as any;
   },
 
   // Get a single group purchase by ID
@@ -59,7 +59,8 @@ export const groupsApi = {
           joined_at,
           user:users(
             first_name,
-            last_name
+            last_name,
+            email
           )
         )
       `)
@@ -67,7 +68,7 @@ export const groupsApi = {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as any;
   },
 
   // Join a group purchase
@@ -75,6 +76,7 @@ export const groupsApi = {
     // Add participant
     const { data: participant, error: participantError } = await supabase
       .from('group_participants')
+      // @ts-ignore - Type issue with Supabase generated types
       .insert({
         group_id: groupId,
         user_id: userId,
@@ -92,13 +94,14 @@ export const groupsApi = {
       .eq('id', groupId)
       .single();
 
-    if (groupError) throw groupError;
+    if (groupError || !group) throw groupError || new Error('Group not found');
 
     const { error: updateError } = await supabase
       .from('group_purchases')
+      // @ts-ignore - Type issue with Supabase generated types
       .update({
-        current_quantity: (group.current_quantity || 0) + quantity,
-        participant_count: (group.participant_count || 0) + 1,
+        current_quantity: ((group as any).current_quantity || 0) + quantity,
+        participant_count: ((group as any).participant_count || 0) + 1,
       })
       .eq('id', groupId);
 
@@ -135,13 +138,15 @@ export const groupsApi = {
       .eq('id', groupId)
       .single();
 
-    if (groupError) throw groupError;
+    if (groupError || !group) throw groupError || new Error('Group not found');
+    if (!participant) throw new Error('Participant not found');
 
     const { error: updateError } = await supabase
       .from('group_purchases')
+      // @ts-ignore - Type issue with Supabase generated types
       .update({
-        current_quantity: (group.current_quantity || 0) - participant.quantity,
-        participant_count: (group.participant_count || 0) - 1,
+        current_quantity: ((group as any).current_quantity || 0) - (participant as any).quantity,
+        participant_count: ((group as any).participant_count || 0) - 1,
       })
       .eq('id', groupId);
 
@@ -180,7 +185,7 @@ export const groupsApi = {
       .order('joined_at', { ascending: false });
 
     if (error) throw error;
-    return data;
+    return data as any;
   },
 
   // Create a new group purchase
@@ -196,7 +201,41 @@ export const groupsApi = {
   }) => {
     const { data, error } = await supabase
       .from('group_purchases')
+      // @ts-ignore - Type issue with Supabase generated types
       .insert(groupData)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as any;
+  },
+
+  // Get groups organized by seller
+  getSellerGroups: async (sellerId: string) => {
+    const { data, error } = await supabase
+      .from('group_purchases')
+      .select(`
+        *,
+        product:products(
+          title,
+          images,
+          unit
+        )
+      `)
+      .eq('organizer_id', sellerId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Update group status
+  updateGroupStatus: async (groupId: string, status: 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'EXPIRED') => {
+    const { data, error } = await supabase
+      .from('group_purchases')
+      // @ts-ignore
+      .update({ status })
+      .eq('id', groupId)
       .select()
       .single();
 

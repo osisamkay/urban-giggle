@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import Image from 'next/image';
 import { productsApi } from '@/lib/api';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useAuthStore } from '@/store/authStore';
+import type { Product } from '@sharesteak/types';
 
 type ProductCategory = 'BEEF' | 'PORK' | 'CHICKEN' | 'LAMB' | 'SEAFOOD' | 'GAME' | 'OTHER';
 
@@ -75,11 +77,10 @@ export default function ProductsPage() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedCategory(undefined)}
-              className={`px-4 py-2 rounded-lg transition ${
-                !selectedCategory
+              className={`px-4 py-2 rounded-lg transition ${!selectedCategory
                   ? 'bg-primary-600 text-white'
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-              }`}
+                }`}
             >
               All
             </button>
@@ -87,11 +88,10 @@ export default function ProductsPage() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg transition ${
-                  selectedCategory === category
+                className={`px-4 py-2 rounded-lg transition ${selectedCategory === category
                     ? 'bg-primary-600 text-white'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {category}
               </button>
@@ -106,7 +106,7 @@ export default function ProductsPage() {
           </div>
         ) : products && products.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product: any) => (
+            {products.map((product: Product) => (
               <Link
                 key={product.id}
                 href={`/products/${product.id}`}
@@ -114,10 +114,11 @@ export default function ProductsPage() {
               >
                 <div className="aspect-square bg-gray-200 relative group">
                   {product.images && product.images.length > 0 ? (
-                    <img
+                    <Image
                       src={product.images[0]}
                       alt={product.title}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -130,11 +131,10 @@ export default function ProductsPage() {
                   {/* Wishlist button */}
                   <button
                     onClick={(e) => handleToggleWishlist(e, product.id)}
-                    className={`absolute top-2 right-2 w-9 h-9 rounded-full shadow-md flex items-center justify-center transition-all ${
-                      isInWishlist(product.id)
+                    className={`absolute top-2 right-2 w-9 h-9 rounded-full shadow-md flex items-center justify-center transition-all ${isInWishlist(product.id)
                         ? 'bg-meat-600 text-white scale-100'
                         : 'bg-white text-gray-600 hover:bg-meat-50 opacity-0 group-hover:opacity-100'
-                    }`}
+                      }`}
                   >
                     <svg
                       className="w-5 h-5"

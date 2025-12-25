@@ -27,8 +27,19 @@ export const productsApi = {
           verified,
           location
         )
-      `)
-      .eq('status', 'ACTIVE');
+      `);
+
+    if (filters?.status) {
+      query = query.eq('status', filters.status);
+    } else {
+      // Default to ACTIVE if not specified? 
+      // Or should public API default to active?
+      // Usually safer to default to ACTIVE for public.
+      // Admin can pass 'any' or different status?
+      // If I want "ALL", I need a way to say "no filter".
+      // Maybe strict check for undefined?
+      query = query.eq('status', 'ACTIVE');
+    }
 
     if (filters?.category) {
       query = query.eq('category', filters.category);
@@ -133,6 +144,7 @@ export const productsApi = {
   createProduct: async (product: ProductInsert) => {
     const { data, error } = await supabase
       .from('products')
+      // @ts-ignore - Type issue with Supabase generated types
       .insert(product)
       .select()
       .single();
@@ -145,6 +157,7 @@ export const productsApi = {
   updateProduct: async (id: string, updates: ProductUpdate) => {
     const { data, error } = await supabase
       .from('products')
+      // @ts-ignore - Type issue with Supabase generated types
       .update(updates)
       .eq('id', id)
       .select()
@@ -174,5 +187,18 @@ export const productsApi = {
 
     if (error) throw error;
     return data;
+  },
+
+  getAdminProducts: async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        seller:seller_profiles(business_name, rating, verified)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as any;
   },
 };

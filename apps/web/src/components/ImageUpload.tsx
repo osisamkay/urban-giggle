@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase/client';
 
 interface ImageUploadProps {
@@ -107,6 +108,7 @@ export function ImageUpload({
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFiles(e.dataTransfer.files);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [images, maxImages]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,11 +133,10 @@ export function ImageUpload({
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-            dragActive
-              ? 'border-meat-600 bg-meat-50'
-              : 'border-gray-300 hover:border-meat-400'
-          } ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+          className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${dragActive
+            ? 'border-meat-600 bg-meat-50'
+            : 'border-gray-300 hover:border-meat-400'
+            } ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
         >
           <input
             type="file"
@@ -148,9 +149,8 @@ export function ImageUpload({
 
           <div className="flex flex-col items-center">
             <svg
-              className={`w-12 h-12 mb-4 ${
-                dragActive ? 'text-meat-600' : 'text-gray-400'
-              }`}
+              className={`w-12 h-12 mb-4 ${dragActive ? 'text-meat-600' : 'text-gray-400'
+                }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -198,10 +198,11 @@ export function ImageUpload({
               key={index}
               className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 group"
             >
-              <img
+              <Image
                 src={url}
                 alt={`Product ${index + 1}`}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
 
               {/* Primary Badge */}

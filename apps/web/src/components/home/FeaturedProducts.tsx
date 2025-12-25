@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 
 const container = {
@@ -25,7 +26,7 @@ const featuredProducts = [
     id: 1,
     name: 'Premium Ribeye Steak',
     price: 45.99,
-    image: '/images/ribeye.jpg',
+    image: '/images/ribeye.png',
     rating: 4.9,
     reviews: 127,
     badge: 'Bestseller',
@@ -34,7 +35,7 @@ const featuredProducts = [
     id: 2,
     name: 'Grass-Fed Ground Beef',
     price: 12.99,
-    image: '/images/ground-beef.jpg',
+    image: '/images/ground-beef.png',
     rating: 4.8,
     reviews: 89,
     badge: 'Popular',
@@ -43,7 +44,7 @@ const featuredProducts = [
     id: 3,
     name: 'Organic Chicken Breast',
     price: 19.99,
-    image: '/images/chicken.jpg',
+    image: '/images/chicken.jpg', // Placeholder
     rating: 4.7,
     reviews: 64,
     badge: 'New',
@@ -52,7 +53,7 @@ const featuredProducts = [
     id: 4,
     name: 'Wagyu Beef Tenderloin',
     price: 89.99,
-    image: '/images/wagyu.jpg',
+    image: '/images/wagyu.jpg', // Placeholder
     rating: 5.0,
     reviews: 43,
     badge: 'Premium',
@@ -91,34 +92,42 @@ export function FeaturedProducts() {
                 <div className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   {/* Product Image */}
                   <div className="relative h-48 bg-gradient-to-br from-meat-100 to-meat-200 overflow-hidden">
-                    {/* Placeholder - replace with actual image */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <svg
-                        className="w-20 h-20 text-meat-400 opacity-50"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
+                    {product.image.endsWith('.png') ? (
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      /* Placeholder - replace with actual image */
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <svg
+                          className="w-20 h-20 text-meat-400 opacity-50"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </div>
+                    )}
 
                     {/* Badge */}
                     <div className="absolute top-3 left-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        product.badge === 'Bestseller'
-                          ? 'bg-meat-600 text-white'
-                          : product.badge === 'New'
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${product.badge === 'Bestseller'
+                        ? 'bg-meat-600 text-white'
+                        : product.badge === 'New'
                           ? 'bg-blue-600 text-white'
                           : product.badge === 'Premium'
-                          ? 'bg-yellow-600 text-white'
-                          : 'bg-gray-600 text-white'
-                      }`}>
+                            ? 'bg-yellow-600 text-white'
+                            : 'bg-gray-600 text-white'
+                        }`}>
                         {product.badge}
                       </span>
                     </div>
@@ -153,11 +162,10 @@ export function FeaturedProducts() {
                         {[...Array(5)].map((_, i) => (
                           <svg
                             key={i}
-                            className={`w-4 h-4 ${
-                              i < Math.floor(product.rating)
-                                ? 'text-yellow-400 fill-current'
-                                : 'text-gray-300 fill-current'
-                            }`}
+                            className={`w-4 h-4 ${i < Math.floor(product.rating)
+                              ? 'text-yellow-400 fill-current'
+                              : 'text-gray-300 fill-current'
+                              }`}
                             viewBox="0 0 20 20"
                           >
                             <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
