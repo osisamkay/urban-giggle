@@ -11,6 +11,7 @@ export default function AdminDashboard() {
         queryKey: ['admin-orders'],
         queryFn: ordersApi.getAllOrders,
         retry: 2, // Don't retry indefinitely
+        enabled: !!user && user.role === 'ADMIN', // Only fetch when admin user is authenticated
     });
 
     // Calculate Stats

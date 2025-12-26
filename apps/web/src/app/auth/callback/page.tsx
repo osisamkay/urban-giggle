@@ -26,6 +26,20 @@ export default function AuthCallbackPage() {
                     return;
                 }
 
+                // Handle OAuth PKCE code exchange (for Google OAuth, etc.)
+                const code = searchParams.get('code');
+                if (code) {
+                    setStatus('Exchanging authorization code...');
+                    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+                    if (exchangeError) {
+                        console.error('Code exchange error:', exchangeError);
+                        setStatus('Failed to complete sign in. Redirecting...');
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        router.replace('/login');
+                        return;
+                    }
+                }
+
                 // For magic links, Supabase sends tokens in hash fragment
                 // The Supabase client should automatically detect and process these
                 // We need to wait for the auth state to change
