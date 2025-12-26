@@ -242,4 +242,48 @@ export const groupsApi = {
     if (error) throw error;
     return data;
   },
+
+  // Get all groups for admin
+  getAllGroups: async () => {
+    const { data, error } = await supabase
+      .from('group_purchases')
+      .select(`
+        *,
+        product:products(title, images),
+        organizer:users(first_name, last_name, email)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as any;
+  },
+
+  // Get group stats for admin dashboard
+  getGroupStats: async () => {
+    const { data, error } = await supabase
+      .from('group_purchases')
+      .select('id, status, current_quantity, target_quantity, participant_count, deadline');
+
+    if (error) throw error;
+
+    const groups = data || [];
+    const activeGroups = groups.filter((g: any) => g.status === 'ACTIVE').length;
+    const completedGroups = groups.filter((g: any) => g.status === 'COMPLETED').length;
+    const totalParticipants = groups.reduce((sum: number, g: any) => sum + (g.participant_count || 0), 0);
+
+    // Groups expiring soon (within 3 days)
+    const threeDaysFromNow = new Date();
+    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+    const expiringSoon = groups.filter((g: any) =>
+      g.status === 'ACTIVE' && new Date(g.deadline) <= threeDaysFromNow
+    ).length;
+
+    return {
+      totalGroups: groups.length,
+      activeGroups,
+      completedGroups,
+      totalParticipants,
+      expiringSoon,
+    };
+  },
 };

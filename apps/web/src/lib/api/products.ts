@@ -201,4 +201,50 @@ export const productsApi = {
     if (error) throw error;
     return data as any;
   },
+
+  // Get product stats for admin dashboard
+  getProductStats: async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('id, status, inventory, category, created_at');
+
+    if (error) throw error;
+
+    const products = data || [];
+    const totalProducts = products.length;
+    const activeProducts = products.filter((p: any) => p.status === 'ACTIVE').length;
+    const lowStockProducts = products.filter((p: any) => p.inventory <= 10 && p.status === 'ACTIVE');
+    const outOfStockProducts = products.filter((p: any) => p.status === 'OUT_OF_STOCK').length;
+
+    // Category breakdown
+    const categoryCount: Record<string, number> = {};
+    products.forEach((p: any) => {
+      categoryCount[p.category] = (categoryCount[p.category] || 0) + 1;
+    });
+
+    return {
+      totalProducts,
+      activeProducts,
+      lowStockCount: lowStockProducts.length,
+      outOfStockProducts,
+      categoryBreakdown: categoryCount,
+    };
+  },
+
+  // Get low stock products for admin alerts
+  getLowStockProducts: async (threshold = 10) => {
+    const { data, error } = await supabase
+      .from('products')
+      .select(`
+        id, title, inventory, unit, status, images,
+        seller:seller_profiles(business_name)
+      `)
+      .eq('status', 'ACTIVE')
+      .lte('inventory', threshold)
+      .order('inventory', { ascending: true })
+      .limit(5);
+
+    if (error) throw error;
+    return data as any;
+  },
 };
