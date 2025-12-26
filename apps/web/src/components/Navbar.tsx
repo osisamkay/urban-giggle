@@ -32,6 +32,8 @@ export function Navbar() {
     { href: '/community', label: 'Community' },
   ];
 
+  if (pathname?.startsWith('/admin')) return null;
+
   if (user?.role === 'SELLER') {
     navLinks.push({ href: '/seller/dashboard', label: 'Dashboard' });
   }

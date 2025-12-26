@@ -6,20 +6,50 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-    const { user, isLoading: authLoading } = useAuthStore();
+    const { user, isLoading: authLoading, refreshUser } = useAuthStore();
     const router = useRouter();
     const pathname = usePathname();
     const [isSidebarOpen, setSidebarOpen] = useState(false);
+    const [isHydrated, setIsHydrated] = useState(false);
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
+    // Wait for Zustand to hydrate from localStorage
     useEffect(() => {
-        if (!authLoading && (!user || user.role !== 'ADMIN')) {
+        setIsHydrated(true);
+    }, []);
+
+    // Check auth after hydration
+    useEffect(() => {
+        if (!isHydrated) return;
+
+        const checkAuth = async () => {
+            // If no user after hydration, try refreshing from Supabase session
+            if (!user) {
+                await refreshUser();
+            }
+            setIsCheckingAuth(false);
+        };
+
+        checkAuth();
+    }, [isHydrated, user, refreshUser]);
+
+    // Redirect if not admin AFTER hydration and auth check complete
+    useEffect(() => {
+        if (!isHydrated || isCheckingAuth || authLoading) return;
+
+        if (!user || user.role !== 'ADMIN') {
+            console.log('AdminLayout: Redirecting - user:', user?.email, 'role:', user?.role);
             router.push('/');
         }
-    }, [user, authLoading, router]);
+    }, [user, isHydrated, isCheckingAuth, authLoading, router]);
 
-    if (authLoading) {
+    // Show loading while hydrating or checking auth
+    if (!isHydrated || isCheckingAuth || authLoading) {
         return <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-meat-600"></div>
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-meat-600 mx-auto mb-4"></div>
+                <p className="text-sm text-gray-500">Verifying access...</p>
+            </div>
         </div>;
     }
 
@@ -27,6 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const links = [
         { href: '/admin', label: 'Dashboard', icon: '📊' },
+        { href: '/admin/merchants', label: 'Merchants', icon: '🏪' },
         { href: '/admin/users', label: 'Users', icon: '👥' },
         { href: '/admin/products', label: 'Products', icon: '🥩' },
         { href: '/admin/orders', label: 'Orders', icon: '📦' },

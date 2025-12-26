@@ -8,7 +8,9 @@ interface AuthState {
   user: User | null;
   isLoading: boolean;
   setUser: (user: User | null) => void;
+  setLoading: (loading: boolean) => void;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithMagicLink: (email: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signUp: (data: { email: string; password: string; firstName: string; lastName: string }) => Promise<void>;
   signOut: () => Promise<void>;
@@ -22,15 +24,28 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
-      isLoading: false,
+      isLoading: false, // Providers.tsx handles initial auth check visibility
 
       setUser: (user) => set({ user }),
+
+      setLoading: (loading) => set({ isLoading: loading }),
 
       signIn: async (email, password) => {
         set({ isLoading: true });
         try {
           const { user: userData } = await authApi.signIn({ email, password });
           set({ user: userData as User, isLoading: false });
+        } catch (error) {
+          set({ isLoading: false });
+          throw error;
+        }
+      },
+
+      signInWithMagicLink: async (email) => {
+        set({ isLoading: true });
+        try {
+          await authApi.signInWithMagicLink(email);
+          set({ isLoading: false });
         } catch (error) {
           set({ isLoading: false });
           throw error;
@@ -100,23 +115,9 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      // Only persist the user, not the loading state
+      partialize: (state) => ({ user: state.user }),
     }
   )
 );
 
-// Initialize auth state on app load
-if (typeof window !== 'undefined') {
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    if (session?.user) {
-      try {
-        const userData = await authApi.getCurrentUserProfile();
-        useAuthStore.getState().setUser(userData as User);
-      } catch (error) {
-        console.error('Error fetching user profile:', error);
-        useAuthStore.getState().setUser(null);
-      }
-    } else {
-      useAuthStore.getState().setUser(null);
-    }
-  });
-}

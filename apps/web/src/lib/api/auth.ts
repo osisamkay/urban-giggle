@@ -67,6 +67,18 @@ export const authApi = {
     return { auth: authData, user: userData };
   },
 
+  // Sign in with Magic Link (OTP)
+  signInWithMagicLink: async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) throw error;
+  },
+
   // Sign out
   signOut: async () => {
     const { error } = await supabase.auth.signOut();
