@@ -2,14 +2,16 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import NotificationsDropdown from './NotificationsDropdown';
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const signOut = useAuthStore((state) => state.signOut);
   const itemCount = useCartStore((state) => state.getItemCount());
@@ -19,8 +21,12 @@ export function Navbar() {
     try {
       await signOut();
       setMobileMenuOpen(false);
+      toast.success('Logged out successfully');
+      router.push('/');
+      router.refresh();
     } catch (error) {
       console.error('Sign out error:', error);
+      toast.error('Failed to log out');
     }
   };
 

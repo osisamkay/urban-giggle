@@ -2,8 +2,10 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect, useRef } from 'react';
+import { Toaster } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase/client';
 import { useAuthStore } from '@/store/authStore';
+import { ErrorBoundary } from './ErrorBoundary';
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const { refreshUser, setUser, setLoading } = useAuthStore();
@@ -34,8 +36,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email);
-
         if (event === 'SIGNED_IN' && session) {
           await refreshUser();
           setLoading(false);
@@ -73,7 +73,32 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#333',
+              color: '#fff',
+              borderRadius: '10px',
+            },
+            success: {
+              style: {
+                background: '#22c55e',
+              },
+            },
+            error: {
+              style: {
+                background: '#ef4444',
+              },
+            },
+          }}
+        />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

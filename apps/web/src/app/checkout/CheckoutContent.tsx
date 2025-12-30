@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { AddressSelection } from '@/components/AddressSelection';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { ordersApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export default function CheckoutContent() {
     const stripe = useStripe();
@@ -48,7 +49,7 @@ export default function CheckoutContent() {
                     ? validationData.errors.map((e: any) => e.message).join('\n')
                     : validationData.message || 'Stock validation failed';
 
-                alert(`Cannot proceed with checkout:\n${errorMsg}`);
+                toast.error(`Cannot proceed with checkout: ${errorMsg}`);
                 setIsPlacingOrder(false);
                 return;
             }
@@ -69,15 +70,26 @@ export default function CheckoutContent() {
 
             if (error) {
                 console.error('Payment failed:', error);
-                alert(`Payment failed: ${error.message}`);
+                toast.error(`Payment failed: ${error.message}`);
                 setIsPlacingOrder(false);
                 return;
             }
 
             if (paymentIntent && paymentIntent.status === 'succeeded') {
                 // 2. Create Order
+                // Get seller_id from the first item's product
+                // TODO: For multi-seller carts, create separate orders per seller
+                const sellerId = items[0]?.product?.sellerId;
+
+                if (!sellerId) {
+                    toast.error('Unable to determine seller. Please try again.');
+                    setIsPlacingOrder(false);
+                    return;
+                }
+
                 await ordersApi.createOrder({
                     buyer_id: user.id,
+                    seller_id: sellerId,
                     items: items.map(item => ({
                         product_id: item.product!.id,
                         quantity: item.quantity,
@@ -96,7 +108,7 @@ export default function CheckoutContent() {
             }
         } catch (error) {
             console.error('Order creation failed:', error);
-            alert('Payment succeeded but order creation failed. Please contact support.');
+            toast.error('Payment succeeded but order creation failed. Please contact support.');
         } finally {
             setIsPlacingOrder(false);
         }
@@ -165,7 +177,7 @@ export default function CheckoutContent() {
                                         if (shippingAddressId) {
                                             setStep(2);
                                         } else {
-                                            alert('Please select a shipping address');
+                                            toast.error('Please select a shipping address');
                                         }
                                     }}
                                     disabled={!shippingAddressId}

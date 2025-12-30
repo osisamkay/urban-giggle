@@ -1,9 +1,35 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { requireAuth } from '@/lib/supabase/server-auth';
 
 export async function POST(request: Request) {
     try {
+        // Verify authentication
+        const authResult = await requireAuth();
+        if ('error' in authResult) {
+            return NextResponse.json(
+                { error: authResult.error },
+                { status: authResult.status }
+            );
+        }
+
         const orderData = await request.json();
+
+        // Verify the buyer_id matches the authenticated user
+        if (orderData.buyer_id !== authResult.user.id) {
+            return NextResponse.json(
+                { error: 'Forbidden - Cannot create order for another user' },
+                { status: 403 }
+            );
+        }
+
+        // Validate seller_id is provided
+        if (!orderData.seller_id) {
+            return NextResponse.json(
+                { error: 'seller_id is required' },
+                { status: 400 }
+            );
+        }
 
         // Extract items for separate processing
         const { items, ...orderFields } = orderData;

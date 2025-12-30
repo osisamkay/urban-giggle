@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersApi } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import Image from 'next/image';
 
 export default function AdminUsersPage() {

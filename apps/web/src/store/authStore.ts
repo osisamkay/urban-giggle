@@ -90,10 +90,16 @@ export const useAuthStore = create<AuthState>()(
       signOut: async () => {
         try {
           await authApi.signOut();
-          set({ user: null });
         } catch (error) {
           console.error('Sign out error:', error);
-          throw error;
+          // Continue to clear user state even if Supabase signOut fails
+        } finally {
+          // Always clear user state
+          set({ user: null });
+          // Clear persisted storage
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('auth-storage');
+          }
         }
       },
 

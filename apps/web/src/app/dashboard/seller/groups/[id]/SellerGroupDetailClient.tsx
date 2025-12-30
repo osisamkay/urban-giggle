@@ -5,7 +5,7 @@ import { groupsApi } from '@/lib/api/groups';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 interface Props {
     id: string;
@@ -57,8 +57,8 @@ export default function SellerGroupDetailClient({ id }: Props) {
                             ← Back
                         </Link>
                         <div className={`px-3 py-1 rounded-full text-xs font-semibold ${group.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                                group.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
-                                    'bg-gray-100 text-gray-800'
+                            group.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
+                                'bg-gray-100 text-gray-800'
                             }`}>
                             {group.status}
                         </div>

@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import Link from 'next/link';
 import Image from 'next/image';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const CATEGORY_COLORS: Record<string, string> = {
     'BEEF': '#e11d48',

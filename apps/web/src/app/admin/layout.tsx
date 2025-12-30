@@ -38,7 +38,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         if (!isHydrated || isCheckingAuth || authLoading) return;
 
         if (!user || user.role !== 'ADMIN') {
-            console.log('AdminLayout: Redirecting - user:', user?.email, 'role:', user?.role);
             router.push('/');
         }
     }, [user, isHydrated, isCheckingAuth, authLoading, router]);

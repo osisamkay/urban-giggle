@@ -35,7 +35,8 @@
       "Bash(supabase db dump:*)",
       "Bash(psql:*)",
       "Bash(pnpm --filter web build:*)",
-      "Bash(pnpm --filter web tsc:*)"
+      "Bash(pnpm --filter web tsc:*)",
+      "Bash(npx tsc --noEmit)"
     ],
     "deny": [],
     "ask": []

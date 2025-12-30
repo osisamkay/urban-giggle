@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { reviewsApi } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 interface WriteReviewModalProps {
     isOpen: boolean;

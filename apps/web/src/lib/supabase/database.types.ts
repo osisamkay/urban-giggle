@@ -456,6 +456,26 @@ export type Database = {
           updated_at?: string | null
         }
       }
+      wishlists: {
+        Row: {
+          id: string
+          user_id: string
+          product_id: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          product_id: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          product_id?: string
+          created_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never

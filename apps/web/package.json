@@ -15,6 +15,7 @@
     "@sharesteak/types": "workspace:*",
     "@stripe/react-stripe-js": "^5.4.1",
     "@stripe/stripe-js": "^2.4.0",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.80.0",
     "@tanstack/react-query": "^5.83.0",
     "framer-motion": "^12.23.24",
