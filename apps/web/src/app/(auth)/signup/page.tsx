@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
+import { validateSignup } from '@/lib/validation';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -23,18 +24,16 @@ export default function SignupPage() {
     e.preventDefault();
     setError('');
 
+    // Shared validation (email format, password length, required names)
+    const validation = validateSignup(formData);
+    if (!validation.isValid) {
+      setError(validation.errors[0].message);
+      return;
+    }
+
+    // specific component validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
-      return;
-    }
-
-    if (!formData.firstName || !formData.lastName) {
-      setError('Please provide your first and last name');
       return;
     }
 

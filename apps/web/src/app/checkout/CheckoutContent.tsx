@@ -9,6 +9,8 @@ import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js'
 import { ordersApi } from '@/lib/api';
 import toast from 'react-hot-toast';
 
+import { validateCheckout } from '@/lib/validation';
+
 export default function CheckoutContent() {
     const stripe = useStripe();
     const elements = useElements();
@@ -174,10 +176,11 @@ export default function CheckoutContent() {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        if (shippingAddressId) {
+                                        const validation = validateCheckout({ shippingAddressId });
+                                        if (validation.isValid) {
                                             setStep(2);
                                         } else {
-                                            toast.error('Please select a shipping address');
+                                            toast.error(validation.errors[0].message);
                                         }
                                     }}
                                     disabled={!shippingAddressId}

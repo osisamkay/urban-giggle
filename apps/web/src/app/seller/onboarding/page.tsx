@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
+import { validateSellerOnboarding, getFieldError, type ValidationError } from '@/lib/validation';
 
 function SellerOnboardingForm() {
     const router = useRouter();
@@ -21,6 +22,9 @@ function SellerOnboardingForm() {
         certifications: [] as string[],
     });
     const [newCertification, setNewCertification] = useState('');
+    const [errors, setErrors] = useState<ValidationError[]>([]);
+    const [certFile, setCertFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     // Check if user is already a seller
     useEffect(() => {
@@ -58,13 +62,64 @@ function SellerOnboardingForm() {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const addCertification = () => {
-        if (newCertification.trim() && !formData.certifications.includes(newCertification.trim())) {
+    const addCertification = async () => {
+        console.log('Adding certification:', { newCertification, hasFile: !!certFile, userId: user?.id });
+        if (!newCertification.trim()) return;
+
+        let certString = newCertification.trim();
+
+        if (certFile) {
+            setIsUploading(true);
+            try {
+                // Sanitize filename
+                const fileExt = certFile.name.split('.').pop();
+                const fileName = `${Date.now()}-${certFile.name.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
+                const filePath = `certifications/${user?.id || 'anon'}/${fileName}`;
+
+                console.log('Uploading to:', filePath);
+
+                // Add timeout to prevent hanging
+                const uploadPromise = supabase.storage
+                    .from('merchant-assets')
+                    .upload(filePath, certFile);
+
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Upload timed out after 30 seconds')), 30000)
+                );
+
+                const { data, error: uploadError } = await Promise.race([uploadPromise, timeoutPromise]) as any;
+
+                console.log('Upload response:', { data, uploadError });
+
+                if (uploadError) throw uploadError;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('merchant-assets')
+                    .getPublicUrl(filePath);
+
+                console.log('Public URL:', publicUrl);
+
+                certString = `${certString}|${publicUrl}`;
+            } catch (error: any) {
+                console.error('Upload error details:', error);
+                toast.error(`Upload failed: ${error.message}. You can add the certification without a file for now.`);
+                setIsUploading(false);
+                // Don't return - allow adding certification without file if upload fails
+                // Just add the name without URL
+            }
+            setIsUploading(false);
+        }
+
+        if (!formData.certifications.includes(certString)) {
             setFormData(prev => ({
                 ...prev,
-                certifications: [...prev.certifications, newCertification.trim()]
+                certifications: [...prev.certifications, certString]
             }));
             setNewCertification('');
+            setCertFile(null);
+            // Reset file input value
+            const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+            if (fileInput) fileInput.value = '';
         }
     };
 
@@ -84,41 +139,65 @@ function SellerOnboardingForm() {
             return;
         }
 
-        if (!formData.businessName.trim()) {
-            toast.error('Business name is required');
+        console.log('Form data at submission:', formData);
+        const validation = validateSellerOnboarding(formData);
+        if (!validation.isValid) {
+            setErrors(validation.errors);
+            console.log('Validation errors:', validation.errors);
+
+            // Auto-navigate to error step
+            const step1Fields = ['businessName', 'description'];
+            const step2Fields = ['location', 'phoneNumber'];
+
+            if (validation.errors.some(e => step1Fields.includes(e.field))) {
+                setStep(1);
+                toast.error('Please fix errors in Step 1');
+            } else if (validation.errors.some(e => step2Fields.includes(e.field))) {
+                setStep(2);
+                toast.error('Please fix errors in Step 2');
+            } else {
+                toast.error('Please check the form for errors');
+            }
             return;
         }
+        setErrors([]);
 
         setIsLoading(true);
 
         try {
-            // Update user role to SELLER
-            // Update user role to SELLER
-            const { error: userError } = await (supabase
-                .from('users') as any)
-                .update({ role: 'SELLER' })
-                .eq('id', user.id);
+            console.log('Starting onboarding submission via API...');
 
-            if (userError) throw userError;
-
-            // Create seller profile
-            const { error: profileError } = await (supabase
-                .from('seller_profiles') as any)
-                .insert({
-                    user_id: user.id,
-                    business_name: formData.businessName.trim(),
-                    description: formData.description.trim() || null,
-                    location: formData.location.trim() || null,
+            const response = await fetch('/api/seller-onboarding', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    businessName: formData.businessName,
+                    description: formData.description,
+                    location: formData.location,
                     certifications: formData.certifications,
-                    verified: false, // Admin will verify
-                    rating: 0,
-                    total_sales: 0,
-                });
+                }),
+            });
 
-            if (profileError) throw profileError;
+            const data = await response.json();
+            console.log('API response:', data);
 
-            // Refresh user data
-            await refreshUser();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to complete onboarding');
+            }
+
+            // Refresh user data with timeout - don't block redirect if it hangs
+            console.log('Refreshing user...');
+            try {
+                await Promise.race([
+                    refreshUser(),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Refresh timeout')), 5000))
+                ]);
+                console.log('User refreshed successfully');
+            } catch (refreshError) {
+                console.log('User refresh timed out or failed, but profile was created successfully');
+            }
 
             toast.success('Your seller account has been created! Pending admin verification.');
             router.push('/dashboard/seller');
@@ -209,10 +288,13 @@ function SellerOnboardingForm() {
                                         type="text"
                                         value={formData.businessName}
                                         onChange={(e) => handleChange('businessName', e.target.value)}
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${getFieldError(errors, 'businessName') ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
                                         placeholder="Your Farm or Business Name"
                                         required
                                     />
+                                    {getFieldError(errors, 'businessName') && (
+                                        <p className="mt-1 text-sm text-red-500">{getFieldError(errors, 'businessName')}</p>
+                                    )}
                                 </div>
 
                                 <div>
@@ -223,9 +305,12 @@ function SellerOnboardingForm() {
                                         value={formData.description}
                                         onChange={(e) => handleChange('description', e.target.value)}
                                         rows={4}
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none"
+                                        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none ${getFieldError(errors, 'description') ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
                                         placeholder="Tell customers about your business, your practices, and what makes your products special..."
                                     />
+                                    {getFieldError(errors, 'description') && (
+                                        <p className="mt-1 text-sm text-red-500">{getFieldError(errors, 'description')}</p>
+                                    )}
                                 </div>
 
                                 <button
@@ -251,9 +336,12 @@ function SellerOnboardingForm() {
                                         type="text"
                                         value={formData.location}
                                         onChange={(e) => handleChange('location', e.target.value)}
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${getFieldError(errors, 'location') ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
                                         placeholder="City, State"
                                     />
+                                    {getFieldError(errors, 'location') && (
+                                        <p className="mt-1 text-sm text-red-500">{getFieldError(errors, 'location')}</p>
+                                    )}
                                 </div>
 
                                 <div>
@@ -264,9 +352,12 @@ function SellerOnboardingForm() {
                                         type="tel"
                                         value={formData.phoneNumber}
                                         onChange={(e) => handleChange('phoneNumber', e.target.value)}
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all ${getFieldError(errors, 'phoneNumber') ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
                                         placeholder="(555) 123-4567"
                                     />
+                                    {getFieldError(errors, 'phoneNumber') && (
+                                        <p className="mt-1 text-sm text-red-500">{getFieldError(errors, 'phoneNumber')}</p>
+                                    )}
                                 </div>
 
                                 <div className="flex gap-3">
@@ -294,43 +385,68 @@ function SellerOnboardingForm() {
                                 <h2 className="text-xl font-bold text-gray-900 mb-4">Certifications (Optional)</h2>
                                 <p className="text-gray-600 text-sm">Add any certifications your business holds (e.g., USDA Organic, Grass-Fed Certified, etc.)</p>
 
-                                <div className="flex gap-2">
+                                <div className="space-y-3">
                                     <input
                                         type="text"
                                         value={newCertification}
                                         onChange={(e) => setNewCertification(e.target.value)}
                                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCertification())}
-                                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-                                        placeholder="Add a certification"
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                                        placeholder="Certification Name (e.g. USDA Organic)"
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={addCertification}
-                                        className="px-4 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
-                                    >
-                                        Add
-                                    </button>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="file"
+                                            onChange={(e) => setCertFile(e.target.files?.[0] || null)}
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            className="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={addCertification}
+                                            disabled={!newCertification.trim() || isUploading}
+                                            className="px-6 py-2 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {isUploading ? 'Uploading...' : 'Add'}
+                                        </button>
+                                    </div>
+                                    {certFile && <p className="text-xs text-green-600">Selected: {certFile.name}</p>}
                                 </div>
 
                                 {formData.certifications.length > 0 && (
                                     <div className="flex flex-wrap gap-2">
-                                        {formData.certifications.map((cert) => (
-                                            <span
-                                                key={cert}
-                                                className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm font-medium"
-                                            >
-                                                {cert}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeCertification(cert)}
-                                                    className="text-green-600 hover:text-green-800"
+                                        {formData.certifications.map((cert) => {
+                                            const [name, url] = cert.split('|');
+                                            return (
+                                                <span
+                                                    key={cert}
+                                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 rounded-md text-sm font-medium border border-green-200"
                                                 >
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
-                                            </span>
-                                        ))}
+                                                    <span className="flex flex-col sm:flex-row sm:items-center gap-1">
+                                                        <span>{name}</span>
+                                                        {url && (
+                                                            <a
+                                                                href={url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-xs text-green-600 underline hover:text-green-800 bg-white/50 px-1.5 py-0.5 rounded"
+                                                            >
+                                                                View Proof
+                                                            </a>
+                                                        )}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeCertification(cert)}
+                                                        className="text-green-600 hover:text-green-800 ml-1"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </span>
+                                            );
+                                        })}
                                     </div>
                                 )}
 

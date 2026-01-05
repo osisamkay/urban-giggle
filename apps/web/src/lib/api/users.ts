@@ -85,91 +85,37 @@ export const usersApi = {
 
     // Get merchants with extended stats (products, orders, revenue)
     getMerchantsWithStats: async () => {
-        // Get all sellers with profiles
-        const { data: merchants, error: merchantError } = await supabase
-            .from('users')
-            .select('*, seller_profiles(*)')
-            .eq('role', 'SELLER')
-            .order('created_at', { ascending: false });
-
-        if (merchantError) throw merchantError;
-
-        // Get product counts per seller
-        const { data: products, error: productError } = await supabase
-            .from('products')
-            .select('seller_id, status');
-
-        if (productError) throw productError;
-
-        // Get order stats per seller
-        const { data: orders, error: orderError } = await supabase
-            .from('orders')
-            .select('seller_id, total, status');
-
-        if (orderError) throw orderError;
-
-        // Aggregate stats for each merchant
-        const merchantsWithStats = (merchants || []).map((merchant: any) => {
-            // Handle seller_profiles being either an array or a single object
-            let profile = null;
-            if (Array.isArray(merchant.seller_profiles)) {
-                profile = merchant.seller_profiles[0];
-            } else if (merchant.seller_profiles && typeof merchant.seller_profiles === 'object') {
-                profile = merchant.seller_profiles;
-            }
-            if (!profile) return { ...merchant, seller_profiles: [], stats: null };
-
-            const sellerProducts = (products || []).filter((p: any) => p.seller_id === profile.id);
-            const sellerOrders = (orders || []).filter((o: any) => o.seller_id === profile.id);
-
-            const stats = {
-                totalProducts: sellerProducts.length,
-                activeProducts: sellerProducts.filter((p: any) => p.status === 'ACTIVE').length,
-                totalOrders: sellerOrders.length,
-                completedOrders: sellerOrders.filter((o: any) => o.status === 'DELIVERED').length,
-                totalRevenue: sellerOrders
-                    .filter((o: any) => o.status !== 'CANCELLED' && o.status !== 'REFUNDED')
-                    .reduce((sum: number, o: any) => sum + (o.total || 0), 0),
-            };
-
-            return { ...merchant, seller_profiles: [profile], stats };
-        });
-
-        return merchantsWithStats;
+        // Use API endpoint to bypass RLS
+        const response = await fetch('/api/admin/merchants');
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to fetch merchants');
+        }
+        const data = await response.json();
+        return data.merchants;
     },
 
     // Get merchant stats summary for dashboard cards
     getMerchantStats: async () => {
-        const { data: profiles, error } = await supabase
-            .from('seller_profiles')
-            .select('id, verified, rating, total_sales, created_at');
-
-        if (error) throw error;
-
-        const sellers = profiles || [];
-        const now = new Date();
-        const monthAgo = new Date(now.setMonth(now.getMonth() - 1));
-
-        return {
-            totalMerchants: sellers.length,
-            verifiedMerchants: sellers.filter((s: any) => s.verified).length,
-            pendingMerchants: sellers.filter((s: any) => !s.verified).length,
-            newThisMonth: sellers.filter((s: any) => new Date(s.created_at) > monthAgo).length,
-            averageRating: sellers.length > 0
-                ? sellers.reduce((sum: number, s: any) => sum + (s.rating || 0), 0) / sellers.length
-                : 0,
-            totalPlatformSales: sellers.reduce((sum: number, s: any) => sum + (s.total_sales || 0), 0),
-        };
+        // Use API endpoint to bypass RLS
+        const response = await fetch('/api/admin/merchants/stats');
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to fetch merchant stats');
+        }
+        return response.json();
     },
 
     verifyMerchant: async (sellerProfileId: string, verified: boolean) => {
-        const { error } = await supabase
-            .from('seller_profiles')
-            // @ts-ignore
-            .update({ verified })
-            .eq('id', sellerProfileId);
-
-        if (error) throw error;
+        const response = await fetch('/api/admin/merchants/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sellerId: sellerProfileId, verified }),
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to verify merchant');
+        }
     },
 
     // Update seller profile (admin)

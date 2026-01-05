@@ -56,19 +56,14 @@ export function validateSellerOnboarding(data: {
         errors.push({ field: 'businessName', message: 'Business name must be less than 100 characters' });
     }
 
-    // Description validation
-    if (!isRequired(data.description)) {
-        errors.push({ field: 'description', message: 'Description is required' });
-    } else if (!minLength(data.description, 20)) {
-        errors.push({ field: 'description', message: 'Description must be at least 20 characters' });
-    } else if (!maxLength(data.description, 1000)) {
+    // Description validation (optional, but if provided must be 10+ chars)
+    if (data.description && !minLength(data.description, 10)) {
+        errors.push({ field: 'description', message: 'Description must be at least 10 characters' });
+    } else if (data.description && !maxLength(data.description, 1000)) {
         errors.push({ field: 'description', message: 'Description must be less than 1000 characters' });
     }
 
-    // Location validation
-    if (!isRequired(data.location)) {
-        errors.push({ field: 'location', message: 'Location is required' });
-    }
+    // Location validation (optional)
 
     // Phone validation (optional but must be valid if provided)
     if (data.phoneNumber && !isValidPhone(data.phoneNumber)) {
