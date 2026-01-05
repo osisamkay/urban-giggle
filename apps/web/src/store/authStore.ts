@@ -7,8 +7,10 @@ import { supabase } from '@/lib/supabase/client';
 interface AuthState {
   user: User | null;
   isLoading: boolean;
+  hasHydrated: boolean;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
+  setHasHydrated: (hydrated: boolean) => void;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithMagicLink: (email: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -25,10 +27,13 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       isLoading: false, // Providers.tsx handles initial auth check visibility
+      hasHydrated: false,
 
       setUser: (user) => set({ user }),
 
       setLoading: (loading) => set({ isLoading: loading }),
+
+      setHasHydrated: (hydrated) => set({ hasHydrated: hydrated }),
 
       signIn: async (email, password) => {
         set({ isLoading: true });
@@ -123,6 +128,9 @@ export const useAuthStore = create<AuthState>()(
       name: 'auth-storage',
       // Only persist the user, not the loading state
       partialize: (state) => ({ user: state.user }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );

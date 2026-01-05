@@ -12,6 +12,7 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 
 export default function CheckoutPage() {
   const user = useAuthStore((state) => state.user);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const { items, getTotal } = useCartStore();
   const router = useRouter();
   const [clientSecret, setClientSecret] = useState('');
@@ -22,6 +23,9 @@ export default function CheckoutPage() {
   const total = subtotal + tax + shipping;
 
   useEffect(() => {
+    // Wait for hydration before making any redirect decisions
+    if (!hasHydrated) return;
+
     if (!user) {
       router.push('/login?redirect=/checkout');
     } else if (items.length === 0) {
@@ -47,7 +51,16 @@ export default function CheckoutPage() {
         })
         .catch(err => console.error('Error fetching payment intent:', err));
     }
-  }, [user, items, router, total, clientSecret]);
+  }, [user, items, router, total, clientSecret, hasHydrated]);
+
+  // Show loading while hydrating or waiting for auth check
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-meat-600"></div>
+      </div>
+    );
+  }
 
   if (!user || items.length === 0) {
     return null; // redirecting
