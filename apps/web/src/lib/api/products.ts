@@ -54,7 +54,14 @@ export const productsApi = {
     }
 
     if (filters?.search) {
-      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      // Sanitize search input — escape special PostgREST characters
+      const sanitized = filters.search
+        .replace(/[\\%_(),.]/g, '')
+        .trim()
+        .slice(0, 100);
+      if (sanitized) {
+        query = query.or(`title.ilike.%${sanitized}%,description.ilike.%${sanitized}%`);
+      }
     }
 
     if (filters?.sellerId) {

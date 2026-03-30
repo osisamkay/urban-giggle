@@ -1,17 +1,30 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { requireAuth } from '@/lib/supabase/server-auth';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    // @ts-ignore
-    apiVersion: '2024-06-20',
+    apiVersion: '2024-06-20' as Stripe.LatestApiVersion,
 });
 
 export async function POST(request: Request) {
     try {
-        const { amount, currency = 'usd' } = await request.json();
+        // Verify authentication — only logged-in users can create payment intents
+        const authResult = await requireAuth();
+        if ('error' in authResult) {
+            return NextResponse.json(
+                { error: authResult.error },
+                { status: authResult.status }
+            );
+        }
 
-        if (!amount) {
-            return NextResponse.json({ error: 'Amount required' }, { status: 400 });
+        const { amount, currency = 'cad' } = await request.json();
+
+        if (!amount || typeof amount !== 'number' || amount <= 0) {
+            return NextResponse.json({ error: 'Valid positive amount required' }, { status: 400 });
+        }
+
+        if (amount > 99999) {
+            return NextResponse.json({ error: 'Amount exceeds maximum' }, { status: 400 });
         }
 
         const paymentIntent = await stripe.paymentIntents.create({

@@ -40,7 +40,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         const { data: userProfile } = await supabaseAdmin
             .from('users')
             .select('id, email, role, first_name, last_name')
-            .eq('id', (user as any).id)
+            .eq('id', user.id)
             .single();
 
         if (!userProfile) {

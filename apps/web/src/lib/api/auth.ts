@@ -27,17 +27,18 @@ export const authApi = {
     if (authError) throw authError;
     if (!authData.user) throw new Error('User creation failed');
 
-    // Create user profile
+    // Update user profile created by DB trigger (handle_new_user)
+    // with additional fields (name, role). Use upsert to handle
+    // race condition where trigger may not have fired yet.
     const { error: profileError } = await supabase
       .from('users')
-      // @ts-ignore - Type issue with Supabase generated types
-      .insert({
+      .upsert({
         id: authData.user.id,
         email,
         first_name: firstName,
         last_name: lastName,
         role,
-      });
+      }, { onConflict: 'id' });
 
     if (profileError) throw profileError;
 
