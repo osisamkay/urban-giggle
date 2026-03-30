@@ -4,6 +4,8 @@ import './globals.css';
 import { Providers } from '@/components/Providers';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { SkipToContent } from '@/components/SkipToContent';
+import { Analytics } from '@/components/Analytics';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -48,10 +50,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
+        <Analytics />
         <Providers>
+          <SkipToContent />
           <div className="min-h-screen flex flex-col">
             <Navbar />
-            <main className="flex-1">{children}</main>
+            <main id="main-content" className="flex-1" role="main">{children}</main>
             <Footer />
           </div>
         </Providers>
