@@ -32,6 +32,7 @@ export const authApi = {
     // race condition where trigger may not have fired yet.
     const { error: profileError } = await supabase
       .from('users')
+      // @ts-ignore - Supabase generated types are strict; upsert needs full row type
       .upsert({
         id: authData.user.id,
         email,
