@@ -23,7 +23,7 @@ export default function CheckoutContent() {
     const [shippingAddressId, setShippingAddressId] = useState<string | null>(null);
 
     const subtotal = getTotal();
-    const tax = subtotal * 0.08;
+    const tax = Math.round(subtotal * 0.05 * 100) / 100; // 5% GST (Alberta)
     const shipping = subtotal > 100 ? 0 : 9.99;
     const total = subtotal + tax + shipping;
 

@@ -8,14 +8,30 @@ import { Footer } from '@/components/Footer';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'ShareSteak - Modern Meat Marketplace',
+  title: {
+    default: 'ShareSteak - Modern Meat Marketplace',
+    template: '%s | ShareSteak',
+  },
   description:
     'Connect with quality meat producers through group purchasing and community features. Direct-to-consumer meat marketplace with transparent sourcing.',
-  keywords: 'meat marketplace, group purchasing, meat delivery, local farmers, wholesale meat',
+  keywords: 'meat marketplace, group purchasing, meat delivery, local farmers, wholesale meat, Calgary, Alberta',
   icons: {
     icon: '/logos/original.png',
     apple: '/logos/original.png',
   },
+  openGraph: {
+    type: 'website',
+    locale: 'en_CA',
+    siteName: 'ShareSteak',
+    title: 'ShareSteak - Modern Meat Marketplace',
+    description: 'Quality meat, direct from producers. Join group purchases for wholesale prices.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ShareSteak - Modern Meat Marketplace',
+    description: 'Quality meat, direct from producers. Join group purchases for wholesale prices.',
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://sharesteak.com'),
 };
 
 export default function RootLayout({
