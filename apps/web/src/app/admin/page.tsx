@@ -244,7 +244,7 @@ export default function AdminDashboard() {
                                     <Tooltip
                                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                                         cursor={{ fill: '#f8fafc' }}
-                                        formatter={(value: number) => [`$${value.toFixed(2)}`, 'Revenue']}
+                                        formatter={(value: number | undefined) => [`$${(value ?? 0).toFixed(2)}`, 'Revenue']}
                                     />
                                     <Bar dataKey="revenue" fill="#e11d48" radius={[4, 4, 0, 0]} maxBarSize={50} />
                                 </BarChart>
@@ -281,7 +281,7 @@ export default function AdminDashboard() {
                                                 <Cell key={`cell-${index}`} fill={entry.color} />
                                             ))}
                                         </Pie>
-                                        <Tooltip formatter={(value: number) => [value, 'Products']} />
+                                        <Tooltip formatter={(value: number | undefined) => [value ?? 0, 'Products']} />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>

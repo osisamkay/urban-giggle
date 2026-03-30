@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { requireAuth } from '@/lib/supabase/server-auth';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function POST(request: Request) {
     try {
+        // Rate limit: 5 orders per minute per IP
+        const rateLimitResponse = checkRateLimit(request, { maxRequests: 5, windowMs: 60_000 });
+        if (rateLimitResponse) return rateLimitResponse;
+
         // Verify authentication
         const authResult = await requireAuth();
         if ('error' in authResult) {
@@ -71,21 +76,22 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: itemsError.message }, { status: 500 });
         }
 
-        // 3. Decrement Inventory
-        const admin: any = supabaseAdmin;
+        // 3. Decrement Inventory (atomic — prevents race conditions)
         for (const item of items) {
-            const { data: product } = await admin
-                .from('products')
-                .select('inventory, title')
-                .eq('id', item.product_id)
-                .single();
+            const { data: success, error: rpcError } = await (supabaseAdmin as any)
+                .rpc('decrement_inventory', {
+                    p_product_id: item.product_id,
+                    p_quantity: item.quantity,
+                });
 
-            if (product && typeof product.inventory === 'number') {
-                const newInventory = Math.max(0, product.inventory - item.quantity);
-                await admin
-                    .from('products')
-                    .update({ inventory: newInventory })
-                    .eq('id', item.product_id);
+            if (rpcError || !success) {
+                // Rollback: delete order and items if inventory insufficient
+                await supabaseAdmin.from('order_items').delete().eq('order_id', order.id);
+                await supabaseAdmin.from('orders').delete().eq('id', order.id);
+                return NextResponse.json(
+                    { error: `Insufficient inventory for product ${item.product_id}` },
+                    { status: 409 }
+                );
             }
         }
 

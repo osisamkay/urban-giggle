@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { requireAuth } from '@/lib/supabase/server-auth';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: '2024-06-20' as Stripe.LatestApiVersion,
@@ -8,6 +9,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: Request) {
     try {
+        // Rate limit: 10 payment intents per minute per IP
+        const rateLimitResponse = checkRateLimit(request, { maxRequests: 10, windowMs: 60_000 });
+        if (rateLimitResponse) return rateLimitResponse;
+
         // Verify authentication — only logged-in users can create payment intents
         const authResult = await requireAuth();
         if ('error' in authResult) {

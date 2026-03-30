@@ -24,7 +24,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         const { data: { user }, error } = await supabase.auth.getUser();
 
         if (error || !user) {
-            console.log('[server-auth] No authenticated user found');
+            console.debug('[server-auth] No authenticated user found');
             return null;
         }
 

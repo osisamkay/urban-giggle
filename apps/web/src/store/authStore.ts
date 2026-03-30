@@ -39,7 +39,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const { user: userData } = await authApi.signIn({ email, password });
-          set({ user: userData as User, isLoading: false });
+          set({ user: userData as unknown as User, isLoading: false });
         } catch (error) {
           set({ isLoading: false });
           throw error;
@@ -85,7 +85,7 @@ export const useAuthStore = create<AuthState>()(
           });
           // Fetch user profile after signup (already logged in by Supabase)
           const userData = await authApi.getCurrentUserProfile();
-          set({ user: userData as User, isLoading: false });
+          set({ user: userData as unknown as User, isLoading: false });
         } catch (error) {
           set({ isLoading: false });
           throw error;
@@ -111,7 +111,7 @@ export const useAuthStore = create<AuthState>()(
       refreshUser: async () => {
         try {
           const userData = await authApi.getCurrentUserProfile();
-          set({ user: userData as User });
+          set({ user: userData as unknown as User });
         } catch (error) {
           console.error('Refresh user error:', error);
           set({ user: null });

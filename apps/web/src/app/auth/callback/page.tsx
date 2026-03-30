@@ -49,14 +49,12 @@ function AuthCallbackContent() {
                     // First check if session already exists
                     supabase.auth.getSession().then(({ data: { session } }) => {
                         if (session) {
-                            console.log('Session already exists:', session.user.email);
                             resolve(true);
                             return;
                         }
 
                         // If no session, listen for auth state changes
                         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-                            console.log('Auth state changed:', event, session?.user?.email);
                             if (event === 'SIGNED_IN' && session) {
                                 subscription.unsubscribe();
                                 resolve(true);
@@ -91,7 +89,6 @@ function AuthCallbackContent() {
 
                 // Redirect based on role
                 const user = useAuthStore.getState().user;
-                console.log('Callback - User loaded:', user);
 
                 if (user?.role === 'ADMIN') {
                     setStatus('Welcome, Admin! Redirecting to dashboard...');
