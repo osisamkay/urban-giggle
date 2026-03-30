@@ -13,12 +13,9 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/',
 }));
 
-// Mock Next.js Image
+// Mock Next.js Image (returns a plain object — no JSX in .ts file)
 vi.mock('next/image', () => ({
-  default: (props: any) => {
-    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
-    return <img {...props} />;
-  },
+  default: vi.fn().mockImplementation((props: any) => props),
 }));
 
 // Mock Supabase client

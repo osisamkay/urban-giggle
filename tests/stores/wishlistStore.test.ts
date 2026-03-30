@@ -25,7 +25,7 @@ describe('wishlistStore', () => {
   });
 
   it('should check if item is in wishlist', () => {
-    useWishlistStore.setState({ items: ['prod-1', 'prod-2'] });
+    useWishlistStore.setState({ wishlistIds: ['prod-1', 'prod-2'] });
     expect(useWishlistStore.getState().isInWishlist('prod-1')).toBe(true);
     expect(useWishlistStore.getState().isInWishlist('prod-3')).toBe(false);
   });

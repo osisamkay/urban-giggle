@@ -18,7 +18,7 @@ describe('calculateTax', () => {
 
   it('calculates BC GST+PST (12%)', () => {
     const result = calculateTax(100, 'BC');
-    expect(result.rate).toBe(0.12);
+    expect(result.rate).toBeCloseTo(0.12, 10);
     expect(result.amount).toBe(12);
   });
 
