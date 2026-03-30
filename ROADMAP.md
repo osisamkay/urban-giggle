@@ -67,11 +67,11 @@ _Complete the experience_
 ## Phase 4: Testing 🧪
 _Confidence to ship_
 
-- [ ] **4.1** Install Vitest + React Testing Library + MSW
-- [ ] **4.2** Unit tests: auth store, cart store, wishlist store
-- [ ] **4.3** Unit tests: validation utilities
-- [ ] **4.4** Unit tests: ShareCalculator
-- [ ] **4.5** Component tests: Navbar, ProductCard, Pagination, ErrorBoundary
+- [x] **4.1** Install Vitest + React Testing Library + MSW
+- [x] **4.2** Unit tests: auth store, cart store, wishlist store
+- [x] **4.3** Unit tests: validation utilities
+- [x] **4.4** Unit tests: ShareCalculator
+- [ ] **4.5** (component tests — next priority) Component tests: Navbar, ProductCard, Pagination, ErrorBoundary
 - [ ] **4.6** Integration tests: auth flow (signup → login → session)
 - [ ] **4.7** Integration tests: checkout flow (cart → checkout → payment)
 - [ ] **4.8** Install Playwright for E2E
@@ -113,10 +113,10 @@ _Production quality_
 | 1. Security Fixes | 7 | 7 | 100% ✅ |
 | 2. Performance/SEO | 8 | 8 | 100% ✅ |
 | 3. Features/Polish | 9 | 3 | 33% |
-| 4. Testing | 10 | 0 | 0% |
+| 4. Testing | 10 | 4 | 40% |
 | 5. CI/CD | 10 | 6 | 60% |
 | 6. Hardening | 8 | 0 | 0% |
-| **TOTAL** | **52** | **24** | **46%** |
+| **TOTAL** | **52** | **28** | **54%** |
 
 ---
 
