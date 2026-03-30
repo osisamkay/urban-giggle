@@ -32,6 +32,12 @@ export const metadata: Metadata = {
     description: 'Quality meat, direct from producers. Join group purchases for wholesale prices.',
   },
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://sharesteak.com'),
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'ShareSteak',
+  },
 };
 
 export default function RootLayout({
