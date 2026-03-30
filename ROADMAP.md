@@ -31,13 +31,13 @@
 ## Phase 1: Security & Bug Fixes 🔴
 _Critical issues that remain_
 
-- [ ] **1.1** Add Next.js middleware for route protection (no middleware.ts exists — unauthenticated users can still hit protected pages directly)
-- [ ] **1.2** Sanitize search input in products API (`ilike.%${filters.search}%` — potential PostgREST filter injection)
-- [ ] **1.3** Add env var validation at startup (crash fast if SUPABASE_URL, ANON_KEY, STRIPE keys missing)
-- [ ] **1.4** Fix payment intent — no auth check on `/api/create-payment-intent` (anyone can create payment intents)
-- [ ] **1.5** Fix `@ts-ignore` on Stripe apiVersion — update to current type
-- [ ] **1.6** Fix `(user as any).id` cast in server-auth.ts — type properly
-- [ ] **1.7** Audit admin API routes for proper auth checks (merchants, verify, stats)
+- [x] **1.1** Add Next.js middleware for route protection (no middleware.ts exists — unauthenticated users can still hit protected pages directly)
+- [x] **1.2** Sanitize search input in products API (`ilike.%${filters.search}%` — potential PostgREST filter injection)
+- [x] **1.3** Add env var validation at startup (crash fast if SUPABASE_URL, ANON_KEY, STRIPE keys missing)
+- [x] **1.4** Fix payment intent — no auth check on `/api/create-payment-intent` (anyone can create payment intents)
+- [x] **1.5** Fix `@ts-ignore` on Stripe apiVersion — update to current type
+- [x] **1.6** Fix `(user as any).id` cast in server-auth.ts — type properly
+- [x] **1.7** Audit admin API routes for proper auth checks (merchants, verify, stats)
 
 ## Phase 2: Performance & SEO 🚀
 _Make it fast and findable_
@@ -110,13 +110,13 @@ _Production quality_
 
 | Phase | Tasks | Done | Progress |
 |-------|-------|------|----------|
-| 1. Security Fixes | 7 | 0 | 0% |
+| 1. Security Fixes | 7 | 7 | 100% ✅ |
 | 2. Performance/SEO | 8 | 0 | 0% |
 | 3. Features/Polish | 9 | 0 | 0% |
 | 4. Testing | 10 | 0 | 0% |
 | 5. CI/CD | 10 | 0 | 0% |
 | 6. Hardening | 8 | 0 | 0% |
-| **TOTAL** | **52** | **0** | **0%** |
+| **TOTAL** | **52** | **7** | **13%** |
 
 ---
 
