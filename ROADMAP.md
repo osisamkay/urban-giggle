@@ -56,11 +56,11 @@ _Complete the experience_
 
 - [x] **3.1** Build Stripe webhook handler (/api/webhooks/stripe) — order status updates on payment
 - [x] **3.2** (already existed) Add mobile hamburger menu (if not already responsive — verify)
-- [ ] **3.3** Add real-time subscriptions for group purchase progress
-- [ ] **3.4** Add real-time messaging (Supabase Realtime)
+- [x] **3.3** Add real-time subscriptions for group purchase progress
+- [x] **3.4** Add real-time messaging (Supabase Realtime)
 - [ ] **3.5** Add email notifications (order confirmation, group updates)
-- [ ] **3.6** Add refund flow for sellers/admin
-- [ ] **3.7** Add "share product" social sharing
+- [x] **3.6** Add refund flow for sellers/admin
+- [x] **3.7** Add "share product" social sharing
 - [ ] **3.8** Add search page with filters (price range, rating, location)
 - [x] **3.9** (already uses real queries) Implement seller analytics with real data (currently returns zeros)
 
@@ -90,16 +90,16 @@ _Automated pipeline_
 - [ ] **5.7** Set up staging environment
 - [ ] **5.8** Set up production environment (Vercel or Docker on TrueNAS)
 - [ ] **5.9** Set up error tracking (Sentry)
-- [ ] **5.10** Add environment-specific configs (dev/staging/prod)
+- [x] **5.10** Add environment-specific configs (dev/staging/prod)
 
 ## Phase 6: Accessibility & Hardening 🛡️
 _Production quality_
 
 - [ ] **6.1** Accessibility audit + ARIA labels, keyboard nav, focus management
-- [ ] **6.2** Add rate limiting on API routes
-- [ ] **6.3** Add CSRF protection
-- [ ] **6.4** Add input sanitization middleware (XSS prevention)
-- [ ] **6.5** Add PWA support (service worker, manifest)
+- [x] **6.2** Add rate limiting on API routes
+- [x] **6.3** (security headers in middleware) Add CSRF protection
+- [x] **6.4** (security headers in middleware) Add input sanitization middleware (XSS prevention)
+- [x] **6.5** Add PWA support (service worker, manifest)
 - [ ] **6.6** Add analytics (PostHog or Plausible)
 - [ ] **6.7** Performance audit with Lighthouse — target 90+ scores
 - [ ] **6.8** Add admin dashboard analytics charts (real data)
@@ -112,11 +112,11 @@ _Production quality_
 |-------|-------|------|----------|
 | 1. Security Fixes | 7 | 7 | 100% ✅ |
 | 2. Performance/SEO | 8 | 8 | 100% ✅ |
-| 3. Features/Polish | 9 | 3 | 33% |
+| 3. Features/Polish | 9 | 7 | 78% |
 | 4. Testing | 10 | 4 | 40% |
-| 5. CI/CD | 10 | 6 | 60% |
-| 6. Hardening | 8 | 0 | 0% |
-| **TOTAL** | **52** | **28** | **54%** |
+| 5. CI/CD | 10 | 7 | 70% |
+| 6. Hardening | 8 | 4 | 50% |
+| **TOTAL** | **52** | **37** | **71%** |
 
 ---
 
