@@ -41,7 +41,7 @@ export function Navbar() {
   if (pathname?.startsWith('/admin')) return null;
 
   if (user?.role === 'SELLER') {
-    navLinks.push({ href: '/seller/dashboard', label: 'Dashboard' });
+    navLinks.push({ href: '/dashboard/seller', label: 'Dashboard' });
   }
 
   if (user?.role === 'ADMIN') {

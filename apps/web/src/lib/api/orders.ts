@@ -66,7 +66,16 @@ export const ordersApi = {
   },
 
   // Get seller's orders
-  getSellerOrders: async (sellerId: string) => {
+  getSellerOrders: async (userId: string) => {
+    // First get seller_profile ID from user ID
+    const { data: profile } = await supabase
+      .from('seller_profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
+
+    if (!profile) return [];
+
     const { data, error } = await supabase
       .from('orders')
       .select(`
@@ -90,7 +99,7 @@ export const ordersApi = {
           zip_code
         )
       `)
-      .eq('seller_id', sellerId)
+      .eq('seller_id', (profile as any).id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;

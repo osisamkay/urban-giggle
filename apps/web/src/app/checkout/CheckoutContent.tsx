@@ -81,7 +81,7 @@ export default function CheckoutContent() {
                 // 2. Create Order
                 // Get seller_id from the first item's product
                 // TODO: For multi-seller carts, create separate orders per seller
-                const sellerId = items[0]?.product?.sellerId;
+                const sellerId = (items[0]?.product as any)?.seller_id || items[0]?.product?.sellerId;
 
                 if (!sellerId) {
                     toast.error('Unable to determine seller. Please try again.');
@@ -105,8 +105,33 @@ export default function CheckoutContent() {
                     // payment_intent_id: paymentIntent.id // Add this to order if schema supports it
                 });
 
-                clearCart();
+                // Send confirmation email
+                try {
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'order_confirmation',
+                            to: user.email || (user as any).email,
+                            data: {
+                                orderNumber: 'SS-' + Date.now().toString(36).toUpperCase(),
+                                subtotal,
+                                tax,
+                                shipping,
+                                total,
+                                estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }),
+                                appUrl: window.location.origin,
+                            },
+                        }),
+                    });
+                } catch (emailErr) {
+                    console.error('Email send failed (non-blocking):', emailErr);
+                }
+
+                // Navigate FIRST, then clear cart (prevents null render)
                 router.push('/order-confirmation');
+                // Delay cart clear so navigation completes
+                setTimeout(() => clearCart(), 500);
             }
         } catch (error) {
             console.error('Order creation failed:', error);

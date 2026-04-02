@@ -34,7 +34,7 @@ export const useCartStore = create<CartState>()(
             items: [
               ...items,
               {
-                id: crypto.randomUUID(),
+                id: Math.random().toString(36).substring(2) + Date.now().toString(36),
                 productId: product.id,
                 quantity,
                 groupPurchaseId,

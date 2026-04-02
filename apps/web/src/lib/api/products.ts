@@ -185,11 +185,20 @@ export const productsApi = {
   },
 
   // Get seller's products
-  getSellerProducts: async (sellerId: string) => {
+  getSellerProducts: async (userId: string) => {
+    // First get seller_profile ID from user ID
+    const { data: profile } = await supabase
+      .from('seller_profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
+
+    if (!profile) return [];
+
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .eq('seller_id', sellerId)
+      .eq('seller_id', (profile as any).id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;

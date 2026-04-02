@@ -8,80 +8,104 @@ export function DashboardSidebar() {
     const pathname = usePathname();
     const { user, isSeller, isAdmin } = useAuthStore();
 
-    const isActive = (path: string) => pathname?.startsWith(path);
+    const isActive = (path: string) => {
+        if (path === '/dashboard' && pathname === '/dashboard') return true;
+        if (path !== '/dashboard' && pathname?.startsWith(path)) return true;
+        return false;
+    };
 
-    const navigation = [
-        { name: 'Overview', href: '/dashboard', icon: HomeIcon, show: true },
-        {
-            name: 'My Orders',
-            href: '/dashboard/orders',
-            icon: ShoppingBagIcon,
-            show: !isSeller() && !isAdmin()
-        },
-        // Seller Links
-        {
-            name: 'Seller Overview',
-            href: '/dashboard/seller',
-            icon: ChartBarIcon,
-            show: isSeller()
-        },
-        {
-            name: 'My Products',
-            href: '/dashboard/seller/products',
-            icon: CubeIcon,
-            show: isSeller()
-        },
-        {
-            name: 'Group Buys',
-            href: '/dashboard/seller/groups',
-            icon: UserGroupIcon,
-            show: isSeller()
-        },
-        {
-            name: 'Sales Orders',
-            href: '/dashboard/seller/orders',
-            icon: ClipboardListIcon,
-            show: isSeller()
-        },
-        // Admin Links
-        {
-            name: 'Admin Overview',
-            href: '/dashboard/admin',
-            icon: ShieldCheckIcon,
-            show: isAdmin()
-        },
-        {
-            name: 'User Management',
-            href: '/dashboard/admin/users',
-            icon: UsersIcon,
-            show: isAdmin()
-        }
+    // Determine context: are we in seller or admin section?
+    const isSellerSection = pathname?.startsWith('/dashboard/seller');
+    const isAdminSection = pathname?.startsWith('/dashboard/admin');
+
+    const sellerNav = [
+        { name: 'Seller Overview', href: '/dashboard/seller', icon: ChartBarIcon },
+        { name: 'My Products', href: '/dashboard/seller/products', icon: CubeIcon },
+        { name: 'Sales Orders', href: '/dashboard/seller/orders', icon: ClipboardListIcon },
+        { name: 'Group Buys', href: '/dashboard/seller/groups', icon: UserGroupIcon },
     ];
+
+    const adminNav = [
+        { name: 'Admin Overview', href: '/dashboard/admin', icon: ShieldCheckIcon },
+        { name: 'User Management', href: '/dashboard/admin/users', icon: UsersIcon },
+    ];
+
+    // Show seller nav in seller section, admin nav in admin section
+    // If on /dashboard root, show based on role (seller first, then admin)
+    let navigation: typeof sellerNav = [];
+    if (isAdminSection && isAdmin()) {
+        navigation = adminNav;
+    } else if (isSellerSection && isSeller()) {
+        navigation = sellerNav;
+    } else {
+        // On /dashboard root or unknown — show all applicable links
+        if (isSeller()) navigation = [...navigation, ...sellerNav];
+        if (isAdmin()) navigation = [...navigation, ...adminNav];
+    }
 
     return (
         <div className="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-64px)] hidden md:block">
             <div className="p-6">
+                {/* Section label */}
                 <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                    Menu
+                    {isAdminSection ? 'Admin' : 'Seller Dashboard'}
                 </h2>
+
                 <nav className="space-y-1">
-                    {navigation.filter(item => item.show).map((item) => (
+                    {navigation.map((item) => (
                         <Link
                             key={item.name}
                             href={item.href}
-                            className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${isActive(item.href) && item.href !== '/dashboard' // exact match check logic improvement needed for generic root
-                                ? 'bg-meat-50 text-meat-700'
-                                : isActive(item.href) && item.href === '/dashboard' && pathname === '/dashboard'
+                            className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                                isActive(item.href)
                                     ? 'bg-meat-50 text-meat-700'
                                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                                }`}
+                            }`}
                         >
-                            <item.icon className={`mr-3 h-5 w-5 ${isActive(item.href) ? 'text-meat-500' : 'text-gray-400'
-                                }`} />
+                            <item.icon className={`mr-3 h-5 w-5 ${
+                                isActive(item.href) ? 'text-meat-500' : 'text-gray-400'
+                            }`} />
                             {item.name}
                         </Link>
                     ))}
                 </nav>
+
+                {/* Switch section link */}
+                {isAdmin() && isSeller() && (
+                    <div className="mt-8 pt-4 border-t border-gray-200">
+                        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                            Switch To
+                        </h2>
+                        {isSellerSection ? (
+                            <Link
+                                href="/dashboard/admin"
+                                className="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
+                            >
+                                <ShieldCheckIcon className="mr-3 h-5 w-5 text-gray-400" />
+                                Admin Panel
+                            </Link>
+                        ) : (
+                            <Link
+                                href="/dashboard/seller"
+                                className="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
+                            >
+                                <ChartBarIcon className="mr-3 h-5 w-5 text-gray-400" />
+                                Seller Dashboard
+                            </Link>
+                        )}
+                    </div>
+                )}
+
+                {/* Quick links */}
+                <div className="mt-8 pt-4 border-t border-gray-200">
+                    <Link
+                        href="/products"
+                        className="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
+                    >
+                        <HomeIcon className="mr-3 h-5 w-5 text-gray-400" />
+                        Back to Store
+                    </Link>
+                </div>
             </div>
         </div>
     );
@@ -90,9 +114,6 @@ export function DashboardSidebar() {
 // Icons
 function HomeIcon(props: any) {
     return <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>;
-}
-function ShoppingBagIcon(props: any) {
-    return <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>;
 }
 function ChartBarIcon(props: any) {
     return <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>;

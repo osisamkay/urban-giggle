@@ -1,10 +1,11 @@
 'use client';
 
 import { StatCard } from '@/components/dashboard/StatCard';
+import { SimpleBarChart } from '@/components/dashboard/SimpleChart';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/authStore';
-import { usersApi, ordersApi, groupsApi } from '@/lib/api';
+import { ordersApi, groupsApi } from '@/lib/api';
 
 // Icons
 function CurrencyDollarIcon(props: any) {
@@ -19,33 +20,43 @@ function ShoppingCartIcon(props: any) {
 function CubeIcon(props: any) {
     return <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>;
 }
+function BadgeCheckIcon(props: any) {
+    return <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+}
+function ExclamationIcon(props: any) {
+    return <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>;
+}
 
 export default function SellerDashboardPage() {
     const user = useAuthStore((state) => state.user);
 
-    // Fetch seller stats
-    const { data: stats, isLoading: statsLoading } = useQuery({
-        queryKey: ['seller-stats', user?.id],
-        queryFn: () => usersApi.getSellerStats(user!.id),
+    // Fetch seller analytics via API route (server-side RPC)
+    const { data: analytics = {} as any, isLoading: analyticsLoading } = useQuery({
+        queryKey: ['seller-analytics', user?.id],
+        queryFn: async () => {
+            const res = await fetch('/api/seller/analytics?period=30_days');
+            if (!res.ok) throw new Error('Failed to fetch analytics');
+            return res.json();
+        },
         enabled: !!user?.id,
     });
 
     // Fetch recent orders
     const { data: recentOrders = [], isLoading: ordersLoading } = useQuery({
         queryKey: ['seller-orders', user?.id],
-        queryFn: () => ordersApi.getSellerOrders(user!.id),
+        queryFn: async () => ordersApi.getSellerOrders(user!.id),
         enabled: !!user?.id,
     });
 
     // Fetch active groups
-    const { data: groups = [], isLoading: groupsLoading } = useQuery({
+    const { data: groupsRaw = [], isLoading: groupsLoading } = useQuery({
         queryKey: ['seller-groups', user?.id],
-        queryFn: () => groupsApi.getSellerGroups(user!.id),
+        queryFn: async () => groupsApi.getSellerGroups(user!.id),
         enabled: !!user?.id,
     });
 
-    const activeGroups = groups.filter((g: any) => g.status === 'ACTIVE');
-    const isLoading = statsLoading || ordersLoading || groupsLoading;
+    const activeGroups = (groupsRaw as any[]).filter((g: any) => g.status === 'ACTIVE');
+    const isLoading = analyticsLoading || ordersLoading || groupsLoading;
 
     return (
         <div>
@@ -73,32 +84,65 @@ export default function SellerDashboardPage() {
                 ) : (
                     <>
                         <StatCard
-                            title="Total Revenue"
-                            value={`$${(stats?.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                            title="Total Revenue (30 Days)"
+                            value={`$${Number(analytics.total_revenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                             icon={CurrencyDollarIcon}
-                            trend={stats?.revenueTrend !== undefined ? `${stats.revenueTrend >= 0 ? '+' : ''}${stats.revenueTrend}% from last month` : undefined}
-                            trendUp={stats?.revenueTrend !== undefined ? stats.revenueTrend >= 0 : undefined}
                         />
                         <StatCard
-                            title="Active Group Buys"
-                            value={String(stats?.activeGroups || activeGroups.length || 0)}
-                            icon={TrendingUpIcon}
+                            title="Total Orders (30 Days)"
+                            value={String(analytics.total_orders || 0)}
+                            icon={ShoppingCartIcon}
+                        />
+                        <StatCard
+                            title="Fulfilled Orders"
+                            value={String(analytics.fulfilled_orders || 0)}
+                            icon={BadgeCheckIcon}
                         />
                         <StatCard
                             title="Pending Orders"
-                            value={String(stats?.pendingOrders || 0)}
-                            icon={ShoppingCartIcon}
-                            trend={stats?.pendingOrders && stats.pendingOrders > 0 ? "Needs attention" : undefined}
+                            value={String(analytics.pending_orders || 0)}
+                            icon={ExclamationIcon}
+                            trend={analytics.pending_orders > 0 ? "Needs attention" : undefined}
                             trendUp={false}
-                        />
-                        <StatCard
-                            title="Total Products"
-                            value={String(stats?.totalProducts || 0)}
-                            icon={CubeIcon}
                         />
                     </>
                 )}
             </div>
+
+            {/* Revenue by Period Chart */}
+            {!isLoading && analytics.revenue_by_period && analytics.revenue_by_period.length > 0 && (
+                <div className="mb-8">
+                    <SimpleBarChart
+                        title="Revenue Trend (30 Days)"
+                        data={analytics.revenue_by_period.map((item: any) => ({
+                            label: item.period,
+                            value: Number(item.revenue),
+                        }))}
+                        color="#10b981"
+                        formatValue={(v) => `$${v.toFixed(2)}`}
+                    />
+                </div>
+            )}
+
+            {/* Top Products */}
+            {!isLoading && analytics.top_products && analytics.top_products.length > 0 && (
+                <div className="mb-8">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h2 className="font-semibold text-gray-900 mb-4">Top 5 Products by Revenue</h2>
+                        <div className="space-y-4">
+                            {analytics.top_products.map((product: any, idx: number) => (
+                                <div key={product.product_id || idx} className="flex items-center justify-between">
+                                    <div>
+                                        <p className="font-medium text-gray-900">{product.product_title}</p>
+                                        <p className="text-sm text-gray-500">{product.units_sold} units sold</p>
+                                    </div>
+                                    <p className="font-bold text-meat-600">${Number(product.product_revenue).toFixed(2)}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Recent Activity / Active Groups */}
             <div className="grid lg:grid-cols-2 gap-8">
@@ -115,14 +159,9 @@ export default function SellerDashboardPage() {
                         </div>
                     ) : activeGroups.length === 0 ? (
                         <div className="text-center py-8">
-                            <div className="text-gray-400 mb-2">
-                                <TrendingUpIcon className="w-12 h-12 mx-auto opacity-50" />
-                            </div>
+                            <TrendingUpIcon className="w-12 h-12 mx-auto opacity-50 text-gray-400 mb-2" />
                             <p className="text-gray-500 text-sm">No active group purchases yet</p>
-                            <Link
-                                href="/groups/create"
-                                className="inline-block mt-3 text-meat-600 text-sm font-medium hover:text-meat-700"
-                            >
+                            <Link href="/groups/create" className="inline-block mt-3 text-meat-600 text-sm font-medium hover:text-meat-700">
                                 Create your first group buy →
                             </Link>
                         </div>
@@ -136,9 +175,7 @@ export default function SellerDashboardPage() {
                                             Target: {group.target_quantity} • {group.current_quantity || 0} Sold
                                         </p>
                                     </div>
-                                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
-                                        In Progress
-                                    </span>
+                                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">In Progress</span>
                                 </div>
                             ))}
                         </div>
@@ -159,17 +196,15 @@ export default function SellerDashboardPage() {
                                 </div>
                             ))}
                         </div>
-                    ) : recentOrders.length === 0 ? (
+                    ) : (recentOrders as any[]).length === 0 ? (
                         <div className="text-center py-8">
-                            <div className="text-gray-400 mb-2">
-                                <ShoppingCartIcon className="w-12 h-12 mx-auto opacity-50" />
-                            </div>
+                            <ShoppingCartIcon className="w-12 h-12 mx-auto opacity-50 text-gray-400 mb-2" />
                             <p className="text-gray-500 text-sm">No orders yet</p>
                             <p className="text-gray-400 text-xs mt-1">Orders will appear here when customers make purchases</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {recentOrders.slice(0, 5).map((order: any) => (
+                            {(recentOrders as any[]).slice(0, 5).map((order: any) => (
                                 <div key={order.id} className="flex items-center justify-between p-3 border-b border-gray-100 last:border-0">
                                     <div className="flex items-center">
                                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 mr-3">
@@ -190,6 +225,15 @@ export default function SellerDashboardPage() {
                     </Link>
                 </div>
             </div>
+
+            {/* No data placeholder */}
+            {!isLoading && (!analytics.top_products || analytics.top_products.length === 0) && (
+                <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center py-8">
+                    <CubeIcon className="w-12 h-12 mx-auto mb-2 text-gray-400 opacity-50" />
+                    <p className="text-gray-500 text-sm">No product sales data yet</p>
+                    <p className="text-gray-400 text-xs mt-1">Sales data will appear here once customers place orders</p>
+                </div>
+            )}
         </div>
     );
 }
