@@ -18,6 +18,7 @@ export interface CreateOrderData {
   tax: number;
   shipping: number;
   total: number;
+  payment_intent_id?: string;
 }
 
 export const ordersApi = {

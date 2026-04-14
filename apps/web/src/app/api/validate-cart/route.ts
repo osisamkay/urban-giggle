@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabaseAdmin } from '@/lib/supabase/admin';
+import { requireAuth } from '@/lib/supabase/server-auth';
 
 export async function POST(request: Request) {
     try {
+        // Require authentication
+        const authResult = await requireAuth();
+        if ('error' in authResult) {
+            return NextResponse.json(
+                { error: authResult.error },
+                { status: authResult.status }
+            );
+        }
+
         const body = await request.json();
         const { items } = body;
 
@@ -16,7 +22,7 @@ export async function POST(request: Request) {
 
         const productIds = items.map((i: any) => i.productId);
 
-        const { data: products, error } = await supabase
+        const { data: products, error } = await (supabaseAdmin as any)
             .from('products')
             .select('id, title, inventory, status')
             .in('id', productIds);
@@ -29,7 +35,7 @@ export async function POST(request: Request) {
         const errors = [];
 
         for (const item of items) {
-            const product = products.find(p => p.id === item.productId);
+            const product = products.find((p: any) => p.id === item.productId);
 
             if (!product) {
                 errors.push({ productId: item.productId, message: 'Product not found' });

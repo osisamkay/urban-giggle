@@ -1,16 +1,10 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-06-20' as Stripe.LatestApiVersion,
 });
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -44,7 +38,7 @@ export async function POST(request: Request) {
         console.log(`✅ Payment succeeded: ${paymentIntent.id}`);
 
         // Update order status to CONFIRMED
-        const { error } = await supabaseAdmin
+        const { error } = await (supabaseAdmin as any)
           .from('orders')
           .update({
             status: 'CONFIRMED',
@@ -63,7 +57,7 @@ export async function POST(request: Request) {
         console.error(`❌ Payment failed: ${paymentIntent.id}`);
 
         // Update order status to CANCELLED
-        const { error } = await supabaseAdmin
+        const { error } = await (supabaseAdmin as any)
           .from('orders')
           .update({ status: 'CANCELLED' })
           .eq('payment_intent_id', paymentIntent.id);
@@ -79,7 +73,7 @@ export async function POST(request: Request) {
         const paymentIntentId = charge.payment_intent as string;
         console.log(`💰 Refund processed for: ${paymentIntentId}`);
 
-        const { error } = await supabaseAdmin
+        const { error } = await (supabaseAdmin as any)
           .from('orders')
           .update({ status: 'REFUNDED' })
           .eq('payment_intent_id', paymentIntentId);

@@ -44,9 +44,9 @@ export async function POST(request: Request) {
             clientSecret: paymentIntent.client_secret,
         });
     } catch (error: any) {
-        console.error('Internal Error:', error);
+        console.error('Payment intent creation error:', error);
         return NextResponse.json(
-            { error: `Internal Server Error: ${error.message}` },
+            { error: 'Failed to initialize payment. Please try again.' },
             { status: 500 }
         );
     }

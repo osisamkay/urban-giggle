@@ -1,17 +1,11 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { requireAuth } from '@/lib/supabase/server-auth';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-06-20' as Stripe.LatestApiVersion,
 });
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
 
 export async function POST(request: Request) {
   try {
@@ -30,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     // Fetch order
-    const { data: order, error: orderError } = await supabaseAdmin
+    const { data: order, error: orderError } = await (supabaseAdmin as any)
       .from('orders')
       .select('*, seller:seller_profiles(user_id)')
       .eq('id', orderId)
@@ -75,7 +69,7 @@ export async function POST(request: Request) {
     }
 
     // Update order status
-    const { error: updateError } = await supabaseAdmin
+    const { error: updateError } = await (supabaseAdmin as any)
       .from('orders')
       .update({
         status: 'REFUNDED',
@@ -87,25 +81,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to update order' }, { status: 500 });
     }
 
-    // Restore inventory
-    const { data: orderItems } = await supabaseAdmin
+    // Restore inventory atomically using RPC
+    const { data: orderItems } = await (supabaseAdmin as any)
       .from('order_items')
       .select('product_id, quantity')
       .eq('order_id', orderId);
 
     if (orderItems) {
       for (const item of orderItems) {
-        const { data: product } = await supabaseAdmin
-          .from('products')
-          .select('inventory')
-          .eq('id', item.product_id)
-          .single();
+        const { error: rpcError } = await (supabaseAdmin as any)
+          .rpc('restore_inventory', {
+            p_product_id: item.product_id,
+            p_quantity: item.quantity,
+          });
 
-        if (product) {
-          await supabaseAdmin
-            .from('products')
-            .update({ inventory: (product.inventory || 0) + item.quantity })
-            .eq('id', item.product_id);
+        if (rpcError) {
+          console.error(`Failed to restore inventory for product ${item.product_id}:`, rpcError);
+          // Continue restoring other items even if one fails
         }
       }
     }
