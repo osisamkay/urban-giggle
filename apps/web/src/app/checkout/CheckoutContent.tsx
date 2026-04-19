@@ -23,7 +23,7 @@ export default function CheckoutContent() {
     const [shippingAddressId, setShippingAddressId] = useState<string | null>(null);
 
     const subtotal = getTotal();
-    const tax = subtotal * 0.08;
+    const tax = Math.round(subtotal * 0.05 * 100) / 100; // 5% GST (Alberta)
     const shipping = subtotal > 100 ? 0 : 9.99;
     const total = subtotal + tax + shipping;
 
@@ -56,40 +56,23 @@ export default function CheckoutContent() {
                 return;
             }
 
-            // 1. Confirm Payment
-            const { error, paymentIntent } = await stripe.confirmPayment({
-                elements,
-                confirmParams: {
-                    payment_method_data: {
-                        billing_details: {
-                            name: `${user.firstName} ${user.lastName}`,
-                            // address: ... (could lookup address by id but skipping for now)
-                        }
-                    }
-                },
-                redirect: 'if_required',
-            });
+            // 1. Create Order FIRST (PENDING status) before confirming payment
+            // This ensures we never charge a customer without an order record
+            const sellerId = (items[0]?.product as any)?.seller_id || items[0]?.product?.sellerId;
 
-            if (error) {
-                console.error('Payment failed:', error);
-                toast.error(`Payment failed: ${error.message}`);
+            if (!sellerId) {
+                toast.error('Unable to determine seller. Please try again.');
                 setIsPlacingOrder(false);
                 return;
             }
 
-            if (paymentIntent && paymentIntent.status === 'succeeded') {
-                // 2. Create Order
-                // Get seller_id from the first item's product
-                // TODO: For multi-seller carts, create separate orders per seller
-                const sellerId = items[0]?.product?.sellerId;
+            // Extract payment_intent_id from the client secret (format: pi_xxx_secret_yyy)
+            const clientSecret = (elements as any)?.getElement?.('payment')?.['_frame']?.['controllerFrame']?.['__privateStripeInstance']?.['_clientSecret'] || '';
+            const piIdFromSecret = clientSecret?.split('_secret_')?.[0] || undefined;
 
-                if (!sellerId) {
-                    toast.error('Unable to determine seller. Please try again.');
-                    setIsPlacingOrder(false);
-                    return;
-                }
-
-                await ordersApi.createOrder({
+            let order: any;
+            try {
+                order = await ordersApi.createOrder({
                     buyer_id: user.id,
                     seller_id: sellerId,
                     items: items.map(item => ({
@@ -102,11 +85,79 @@ export default function CheckoutContent() {
                     tax,
                     shipping,
                     total,
-                    // payment_intent_id: paymentIntent.id // Add this to order if schema supports it
+                    payment_intent_id: piIdFromSecret,
                 });
+            } catch (orderErr) {
+                console.error('Order creation failed:', orderErr);
+                toast.error('Failed to create order. You have not been charged.');
+                setIsPlacingOrder(false);
+                return;
+            }
 
-                clearCart();
+            // 2. Now confirm payment — order exists in PENDING status
+            const { error, paymentIntent } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    payment_method_data: {
+                        billing_details: {
+                            name: `${user.firstName} ${user.lastName}`,
+                        }
+                    }
+                },
+                redirect: 'if_required',
+            });
+
+            if (error) {
+                console.error('Payment failed:', error);
+                toast.error(`Payment failed: ${error.message}`);
+                // Order stays PENDING — can be cleaned up or retried
+                setIsPlacingOrder(false);
+                return;
+            }
+
+            if (paymentIntent && paymentIntent.status === 'succeeded') {
+                // 3. Update order with confirmed payment_intent_id
+                // The Stripe webhook will also handle CONFIRMED status update
+                try {
+                    await fetch('/api/create-order', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            order_id: order?.id,
+                            payment_intent_id: paymentIntent.id,
+                        }),
+                    });
+                } catch (updateErr) {
+                    console.error('Order update with payment_intent_id failed (non-blocking):', updateErr);
+                }
+
+                // Send confirmation email
+                try {
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: 'order_confirmation',
+                            to: user.email || (user as any).email,
+                            data: {
+                                orderNumber: 'SS-' + Date.now().toString(36).toUpperCase(),
+                                subtotal,
+                                tax,
+                                shipping,
+                                total,
+                                estimatedDelivery: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' }),
+                                appUrl: window.location.origin,
+                            },
+                        }),
+                    });
+                } catch (emailErr) {
+                    console.error('Email send failed (non-blocking):', emailErr);
+                }
+
+                // Navigate FIRST, then clear cart (prevents null render)
                 router.push('/order-confirmation');
+                // Delay cart clear so navigation completes
+                setTimeout(() => clearCart(), 500);
             }
         } catch (error) {
             console.error('Order creation failed:', error);

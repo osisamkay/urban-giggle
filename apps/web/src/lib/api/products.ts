@@ -54,7 +54,14 @@ export const productsApi = {
     }
 
     if (filters?.search) {
-      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      // Sanitize search input — escape special PostgREST characters
+      const sanitized = filters.search
+        .replace(/[\\%_(),.]/g, '')
+        .trim()
+        .slice(0, 100);
+      if (sanitized) {
+        query = query.or(`title.ilike.%${sanitized}%,description.ilike.%${sanitized}%`);
+      }
     }
 
     if (filters?.sellerId) {
@@ -178,11 +185,20 @@ export const productsApi = {
   },
 
   // Get seller's products
-  getSellerProducts: async (sellerId: string) => {
+  getSellerProducts: async (userId: string) => {
+    // First get seller_profile ID from user ID
+    const { data: profile } = await supabase
+      .from('seller_profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
+
+    if (!profile) return [];
+
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .eq('seller_id', sellerId)
+      .eq('seller_id', (profile as any).id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;

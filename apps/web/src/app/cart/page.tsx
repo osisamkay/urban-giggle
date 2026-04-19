@@ -8,7 +8,7 @@ export default function CartPage() {
   const { items, updateQuantity, removeItem, getTotal } = useCartStore();
 
   const subtotal = getTotal();
-  const tax = subtotal * 0.08; // 8% tax
+  const tax = Math.round(subtotal * 0.05 * 100) / 100; // 5% GST (Alberta)
   const shipping = subtotal > 100 ? 0 : 9.99;
   const total = subtotal + tax + shipping;
 

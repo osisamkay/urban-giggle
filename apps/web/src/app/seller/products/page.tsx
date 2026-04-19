@@ -32,7 +32,7 @@ export default function SellerProductsPage() {
       return;
     }
 
-    if (user.role !== 'SELLER') {
+    if (user.role !== 'SELLER' && user.role !== 'ADMIN') {
       router.push('/dashboard');
       return;
     }
@@ -79,7 +79,7 @@ export default function SellerProductsPage() {
     draft: products.filter((p) => p.status === 'DRAFT').length,
   };
 
-  if (!user || user.role !== 'SELLER') {
+  if (!user || user.role !== 'SELLER' && user.role !== 'ADMIN') {
     return null;
   }
 

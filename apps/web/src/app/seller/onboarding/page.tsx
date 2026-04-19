@@ -63,7 +63,6 @@ function SellerOnboardingForm() {
     };
 
     const addCertification = async () => {
-        console.log('Adding certification:', { newCertification, hasFile: !!certFile, userId: user?.id });
         if (!newCertification.trim()) return;
 
         let certString = newCertification.trim();
@@ -76,7 +75,6 @@ function SellerOnboardingForm() {
                 const fileName = `${Date.now()}-${certFile.name.replace(/[^a-zA-Z0-9]/g, '_')}.${fileExt}`;
                 const filePath = `certifications/${user?.id || 'anon'}/${fileName}`;
 
-                console.log('Uploading to:', filePath);
 
                 // Add timeout to prevent hanging
                 const uploadPromise = supabase.storage
@@ -89,7 +87,6 @@ function SellerOnboardingForm() {
 
                 const { data, error: uploadError } = await Promise.race([uploadPromise, timeoutPromise]) as any;
 
-                console.log('Upload response:', { data, uploadError });
 
                 if (uploadError) throw uploadError;
 
@@ -97,7 +94,6 @@ function SellerOnboardingForm() {
                     .from('merchant-assets')
                     .getPublicUrl(filePath);
 
-                console.log('Public URL:', publicUrl);
 
                 certString = `${certString}|${publicUrl}`;
             } catch (error: any) {
@@ -139,11 +135,9 @@ function SellerOnboardingForm() {
             return;
         }
 
-        console.log('Form data at submission:', formData);
         const validation = validateSellerOnboarding(formData);
         if (!validation.isValid) {
             setErrors(validation.errors);
-            console.log('Validation errors:', validation.errors);
 
             // Auto-navigate to error step
             const step1Fields = ['businessName', 'description'];
@@ -165,7 +159,6 @@ function SellerOnboardingForm() {
         setIsLoading(true);
 
         try {
-            console.log('Starting onboarding submission via API...');
 
             const response = await fetch('/api/seller-onboarding', {
                 method: 'POST',
@@ -181,22 +174,18 @@ function SellerOnboardingForm() {
             });
 
             const data = await response.json();
-            console.log('API response:', data);
 
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to complete onboarding');
             }
 
             // Refresh user data with timeout - don't block redirect if it hangs
-            console.log('Refreshing user...');
             try {
                 await Promise.race([
                     refreshUser(),
                     new Promise((_, reject) => setTimeout(() => reject(new Error('Refresh timeout')), 5000))
                 ]);
-                console.log('User refreshed successfully');
             } catch (refreshError) {
-                console.log('User refresh timed out or failed, but profile was created successfully');
             }
 
             toast.success('Your seller account has been created! Pending admin verification.');

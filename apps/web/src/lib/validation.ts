@@ -16,11 +16,12 @@ export function isValidEmail(email: string): boolean {
     return emailRegex.test(email);
 }
 
-// Phone validation (US format)
+// Phone validation (US/Canadian format)
 export function isValidPhone(phone: string): boolean {
-    // Allow various US phone formats
-    const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
+    // Allow various North American phone formats including +1 prefix
+    const cleaned = phone.replace(/[\s\-\.\(\)]/g, '');
+    const phoneRegex = /^(\+?1)?[0-9]{10}$/;
+    return phoneRegex.test(cleaned);
 }
 
 // Required field validation

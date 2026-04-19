@@ -8,6 +8,11 @@ export function Footer() {
   const pathname = usePathname();
   const currentYear = new Date().getFullYear();
 
+  // Hide footer on dashboard pages
+  if (pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/seller')) {
+    return null;
+  }
+
   if (pathname?.startsWith('/admin')) return null;
 
   return (

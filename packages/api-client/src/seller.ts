@@ -123,14 +123,18 @@ export class SellerAPI {
 
   async updateProduct(productId: string, updates: Partial<Product>): Promise<ApiResponse<Product>> {
     try {
-      const { data, error } = await this.supabase
-        .from('products')
-        .update(updates)
-        .eq('id', productId)
-        .select()
-        .single();
+      const response = await fetch('/api/products/update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, updates }),
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update product via API');
+      }
+
+      const data = await response.json();
 
       return {
         success: true,

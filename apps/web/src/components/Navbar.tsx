@@ -32,20 +32,37 @@ export function Navbar() {
 
   const isActivePath = (path: string) => pathname === path;
 
-  const navLinks = [
+  const isDashboard = pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin') || pathname?.startsWith('/seller');
+
+  // Different nav links for dashboard vs public pages
+  const navLinks = isDashboard ? [] : [
     { href: '/products', label: 'Products' },
     { href: '/groups', label: 'Group Purchases' },
     { href: '/community', label: 'Community' },
   ];
 
-  if (pathname?.startsWith('/admin')) return null;
+  // Hide navbar on admin pages
+  if (pathname?.startsWith('/admin') && !pathname?.startsWith('/admin/')) return null;
 
-  if (user?.role === 'SELLER') {
-    navLinks.push({ href: '/seller/dashboard', label: 'Dashboard' });
+  // Role-based dashboard links
+  if (user?.role === 'SELLER' || user?.role === 'ADMIN') {
+    if (!isDashboard) {
+      navLinks.push({ href: '/dashboard/seller', label: 'Dashboard' });
+    }
   }
 
-  if (user?.role === 'ADMIN') {
-    navLinks.push({ href: '/admin', label: 'Admin' });
+  // Admin link only for ADMIN role, not in dashboard
+  if (user?.role === 'ADMIN' && !isDashboard) {
+    navLinks.push({ href: '/dashboard/admin', label: 'Admin' });
+  }
+
+  // In dashboard, show minimal nav — just store link
+  if (isDashboard) {
+    navLinks.push({ href: '/products', label: 'Store' });
+    navLinks.push({ href: '/dashboard/seller', label: 'Dashboard' });
+    if (user?.role === 'ADMIN') {
+      navLinks.push({ href: '/dashboard/admin', label: 'Admin' });
+    }
   }
 
   return (

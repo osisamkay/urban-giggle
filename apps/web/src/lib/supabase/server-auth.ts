@@ -24,7 +24,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         const { data: { user }, error } = await supabase.auth.getUser();
 
         if (error || !user) {
-            console.log('[server-auth] No authenticated user found');
+            console.debug('[server-auth] No authenticated user found');
             return null;
         }
 
@@ -40,7 +40,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         const { data: userProfile } = await supabaseAdmin
             .from('users')
             .select('id, email, role, first_name, last_name')
-            .eq('id', (user as any).id)
+            .eq('id', user.id)
             .single();
 
         if (!userProfile) {

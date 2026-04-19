@@ -1,0 +1,298 @@
+[Fri Apr 17 00:51:15 MDT 2026] Starting deployment...
+Pulling latest changes from GitHub...
+From https://github.com/osisamkay/urban-giggle
+ * branch            master     -> FETCH_HEAD
+ * [new branch]      master     -> origin/master
+hint: You have divergent branches and need to specify how to reconcile them.
+hint: You can do so by running one of the following commands sometime before
+hint: your next pull:
+hint: 
+hint:   git config pull.rebase false  # merge
+hint:   git config pull.rebase true   # rebase
+hint:   git config pull.ff only       # fast-forward only
+hint: 
+hint: You can replace "git config" with "git config --global" to set a default
+hint: preference for all repositories. You can also pass --rebase, --no-rebase,
+hint: or --ff-only on the command line to override the configured default per
+hint: invocation.
+fatal: Need to specify how to reconcile divergent branches.
+Building and restarting containers...
+/data/apps/openclaw/workspace/urban-giggle/deploy.sh: line 20: docker: command not found
+Verifying deployment...
+❌ Deployment Failed: System is not responding
+[Fri Apr 17 03:13:23 EDT 2026] Starting deployment...
+Pulling latest changes from GitHub...
+fatal: detected dubious ownership in repository at '/data/apps/openclaw/workspace/urban-giggle'
+To add an exception for this directory, call:
+
+	git config --global --add safe.directory /data/apps/openclaw/workspace/urban-giggle
+Building and restarting containers...
+time="2026-04-17T03:13:24-04:00" level=warning msg="/data/apps/openclaw/workspace/urban-giggle/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Image urban-giggle-sharesteak-web Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 578B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 814B done
+#2 DONE 0.1s
+
+#3 [internal] load metadata for docker.io/library/node:20-slim
+#3 DONE 0.8s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 99B done
+#4 DONE 0.1s
+
+#5 [internal] load build context
+#5 DONE 0.0s
+
+#6 [base 1/2] FROM docker.io/library/node:20-slim@sha256:f93745c153377ee2fbbdd6e24efcd03cd2e86d6ab1d8aa9916a3790c40313a55
+#6 resolve docker.io/library/node:20-slim@sha256:f93745c153377ee2fbbdd6e24efcd03cd2e86d6ab1d8aa9916a3790c40313a55 0.1s done
+#6 DONE 0.1s
+
+#7 [base 2/2] RUN corepack enable
+#7 CACHED
+
+#8 [runner 1/6] WORKDIR /app
+#8 CACHED
+
+#9 [runner 2/6] RUN addgroup --system --gid 1001 nodejs
+#9 CACHED
+
+#10 [runner 3/6] RUN adduser --system --uid 1001 nextjs
+#10 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 2.61MB 1.7s done
+#5 DONE 2.1s
+
+#7 [base 2/2] RUN corepack enable
+#7 CACHED
+
+#11 [build 1/4] COPY . /usr/src/app
+#11 DONE 29.7s
+
+#12 [build 2/4] WORKDIR /usr/src/app
+#12 DONE 0.8s
+
+#13 [build 3/4] RUN pnpm install
+#13 0.402 ! Corepack is about to download https://registry.npmjs.org/pnpm/-/pnpm-9.0.0.tgz
+#13 3.062 Scope: all 4 workspace projects
+#13 3.232 apps/web                                 |  WARN  Moving @types/node that was installed by a different package manager to "node_modules/.ignored"
+#13 3.234 apps/web                                 |  WARN  Moving @headlessui/react that was installed by a different package manager to "node_modules/.ignored"
+#13 3.235 apps/web                                 |  WARN  Moving @stripe/react-stripe-js that was installed by a different package manager to "node_modules/.ignored"
+#13 3.236 apps/web                                 |  WARN  Moving @stripe/stripe-js that was installed by a different package manager to "node_modules/.ignored"
+#13 3.237 apps/web                                 |  WARN  Moving @supabase/ssr that was installed by a different package manager to "node_modules/.ignored"
+#13 3.237 apps/web                                 |  WARN  Moving @supabase/supabase-js that was installed by a different package manager to "node_modules/.ignored"
+#13 3.238 apps/web                                 |  WARN  Moving @tanstack/react-query that was installed by a different package manager to "node_modules/.ignored"
+#13 3.239 apps/web                                 |  WARN  Moving framer-motion that was installed by a different package manager to "node_modules/.ignored"
+#13 3.240 apps/web                                 |  WARN  Moving next that was installed by a different package manager to "node_modules/.ignored"
+#13 3.241 apps/web                                 |  WARN  Moving react that was installed by a different package manager to "node_modules/.ignored"
+#13 3.242 apps/web                                 |  WARN  Moving react-dom that was installed by a different package manager to "node_modules/.ignored"
+#13 3.243 apps/web                                 |  WARN  Moving react-hook-form that was installed by a different package manager to "node_modules/.ignored"
+#13 3.244 apps/web                                 |  WARN  Moving react-hot-toast that was installed by a different package manager to "node_modules/.ignored"
+#13 3.245 apps/web                                 |  WARN  Moving recharts that was installed by a different package manager to "node_modules/.ignored"
+#13 3.246 apps/web                                 |  WARN  Moving stripe that was installed by a different package manager to "node_modules/.ignored"
+#13 3.246 apps/web                                 |  WARN  Moving zustand that was installed by a different package manager to "node_modules/.ignored"
+#13 4.973 
+#13 4.973    ╭───────────────────────────────────────────────────────────────────╮
+#13 4.973    │                                                                   │
+#13 4.973    │                Update available! 9.0.0 → 10.33.0.                 │
+#13 4.973    │   Changelog: https://github.com/pnpm/pnpm/releases/tag/v10.33.0   │
+#13 4.973    │     Run "corepack prepare pnpm@10.33.0 --activate" to update.     │
+#13 4.973    │                                                                   │
+#13 4.973    │      Follow @pnpmjs for updates: https://twitter.com/pnpmjs       │
+#13 4.973    │                                                                   │
+#13 4.973    ╰───────────────────────────────────────────────────────────────────╯
+#13 4.973 
+#13 23.64 Progress: resolved 1, reused 0, downloaded 0, added 0
+#13 24.41 apps/web                                 |  WARN  deprecated eslint@8.57.1
+#13 24.64 Progress: resolved 24, reused 2, downloaded 22, added 0
+#13 25.64 Progress: resolved 34, reused 2, downloaded 32, added 0
+#13 28.14 Progress: resolved 34, reused 2, downloaded 33, added 0
+#13 29.18 Progress: resolved 97, reused 2, downloaded 83, added 0
+#13 30.18 Progress: resolved 200, reused 2, downloaded 185, added 0
+#13 31.19 Progress: resolved 251, reused 2, downloaded 235, added 0
+#13 32.19 Progress: resolved 365, reused 2, downloaded 349, added 0
+#13 33.22 Progress: resolved 418, reused 2, downloaded 404, added 0
+#13 34.23 Progress: resolved 539, reused 2, downloaded 481, added 0
+#13 35.23 Progress: resolved 625, reused 2, downloaded 528, added 0
+#13 36.23 Progress: resolved 692, reused 2, downloaded 596, added 0
+#13 36.75  WARN  6 deprecated subdependencies found: @humanwhocodes/config-array@0.13.0, @humanwhocodes/object-schema@2.0.3, glob@7.2.3, inflight@1.0.6, rimraf@3.0.2, whatwg-encoding@3.1.1
+#13 36.79 Packages: +598
+#13 36.79 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#13 37.23 Progress: resolved 699, reused 2, downloaded 603, added 0
+#13 38.58 Progress: resolved 699, reused 2, downloaded 603, added 1
+#13 39.58 Progress: resolved 699, reused 2, downloaded 603, added 356
+#13 40.58 Progress: resolved 699, reused 2, downloaded 603, added 556
+#13 41.58 Progress: resolved 699, reused 2, downloaded 603, added 593
+#13 41.86 Progress: resolved 699, reused 2, downloaded 603, added 598, done
+#13 43.92 .../sharp@0.34.5/node_modules/sharp install$ node install/check.js || npm run build
+#13 43.97 .../esbuild@0.21.5/node_modules/esbuild postinstall$ node install.js
+#13 43.98 .../node_modules/unrs-resolver postinstall$ napi-postinstall unrs-resolver 1.11.1 check
+#13 44.14 .../node_modules/unrs-resolver postinstall: Done
+#13 44.17 .../esbuild@0.21.5/node_modules/esbuild postinstall: Done
+#13 44.22 .../sharp@0.34.5/node_modules/sharp install: Done
+#13 50.52 
+#13 50.52 dependencies:
+#13 50.52 + resend 6.10.0
+#13 50.52 
+#13 50.52 devDependencies:
+#13 50.52 + @testing-library/jest-dom 6.9.1
+#13 50.52 + @testing-library/react 16.3.2
+#13 50.52 + @testing-library/user-event 14.6.1
+#13 50.52 + @vitejs/plugin-react 4.7.0
+#13 50.52 + jsdom 25.0.1
+#13 50.52 + prettier 3.6.2
+#13 50.52 + turbo 2.6.0
+#13 50.52 + typescript 5.8.3
+#13 50.52 + vitest 2.1.9
+#13 50.52 
+#13 50.52  WARN  Issues with peer dependencies found
+#13 50.52 apps/web
+#13 50.52 └─┬ @stripe/react-stripe-js 5.4.1
+#13 50.52   └── ✕ unmet peer @stripe/stripe-js@">=8.0.0 <9.0.0": found 2.4.0
+#13 50.52 
+#13 50.52 Done in 48.3s
+#13 DONE 73.4s
+
+#14 [build 4/4] RUN pnpm run build
+#14 2.048 
+#14 2.048 > sharesteak-monorepo@1.0.0 build /usr/src/app
+#14 2.048 > turbo run build
+#14 2.048 
+#14 2.130 
+#14 2.130 Attention:
+#14 2.130 Turborepo now collects completely anonymous telemetry regarding usage.
+#14 2.130 This information is used to shape the Turborepo roadmap and prioritize features.
+#14 2.130 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#14 2.130 https://turborepo.com/docs/telemetry
+#14 2.130 
+#14 2.130 turbo 2.6.0
+#14 2.130 
+#14 2.194 • Packages in scope: @sharesteak/api-client, @sharesteak/types, web
+#14 2.194 • Running build in 3 packages
+#14 2.194 • Remote caching disabled
+#14 9.373 web:build: cache miss, executing 88069e0698d9ca8c
+#14 9.376 @sharesteak/types:build: cache miss, executing e0ab1095c7b060fc
+#14 9.379 @sharesteak/api-client:build: cache miss, executing ed3b192ce0bc1ec8
+#14 10.16 @sharesteak/api-client:build: 
+#14 10.16 @sharesteak/api-client:build: > @sharesteak/api-client@1.0.0 build /usr/src/app/packages/api-client
+#14 10.16 @sharesteak/api-client:build: > tsc
+#14 10.16 @sharesteak/api-client:build: 
+#14 10.16 web:build: 
+#14 10.16 web:build: > web@1.0.0 build /usr/src/app/apps/web
+#14 10.16 web:build: > next build
+#14 10.16 web:build: 
+#14 10.17 @sharesteak/types:build: 
+#14 10.17 @sharesteak/types:build: > @sharesteak/types@1.0.0 build /usr/src/app/packages/types
+#14 10.17 @sharesteak/types:build: > tsc
+#14 10.17 @sharesteak/types:build: 
+#14 11.92 web:build: Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#14 11.92 web:build: This information is used to shape Next.js' roadmap and prioritize features.
+#14 11.92 web:build: You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#14 11.92 web:build: https://nextjs.org/telemetry
+#14 11.92 web:build: 
+#14 12.09 web:build:    ▲ Next.js 15.4.1
+#14 12.10 web:build:    - Environments: .env.local, .env.production
+#14 12.10 web:build:    - Experiments (use with caution):
+#14 12.10 web:build:      · optimizePackageImports
+#14 12.10 web:build: 
+#14 12.45 web:build:    Creating an optimized production build ...
+#14 41.27 web:build: Failed to compile.
+#14 41.27 web:build: 
+#14 41.27 web:build: ./src/app/admin/page.tsx
+#14 41.27 web:build: Module not found: Can't resolve 'lucide-react'
+#14 41.27 web:build: 
+#14 41.27 web:build: https://nextjs.org/docs/messages/module-not-found
+#14 41.27 web:build: 
+#14 41.27 web:build: ./src/app/dashboard/page.tsx
+#14 41.27 web:build: Module not found: Can't resolve 'lucide-react'
+#14 41.27 web:build: 
+#14 41.27 web:build: https://nextjs.org/docs/messages/module-not-found
+#14 41.27 web:build: 
+#14 41.27 web:build: ./src/app/dashboard/seller/page.tsx
+#14 41.27 web:build: Module not found: Can't resolve 'lucide-react'
+#14 41.27 web:build: 
+#14 41.27 web:build: https://nextjs.org/docs/messages/module-not-found
+#14 41.27 web:build: 
+#14 41.27 web:build: ./src/app/layout.tsx
+#14 41.27 web:build: Error:   [31mx[0m Expression expected
+#14 41.27 web:build:     ,-[[36;1;4m/usr/src/app/apps/web/src/app/layout.tsx[0m:51:1]
+#14 41.27 web:build:  [2m48[0m |   children: React.ReactNode;
+#14 41.27 web:build:  [2m49[0m | }) {
+#14 41.27 web:build:  [2m50[0m |   return (
+#14 41.27 web:build:  [2m51[0m |     <<htmlhtml lang="en" className="scroll-smooth" suppressHydrationWarning>
+#14 41.27 web:build:     : [35;1m    ^^[0m
+#14 41.27 web:build:  [2m52[0m |       <<headhead>
+#14 41.27 web:build:  [2m53[0m |         <<scriptscript src="https://cdn.tailwindcss.com"></script>
+#14 41.27 web:build:  [2m54[0m |         <<linklink href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet" />
+#14 41.27 web:build:     `----
+#14 41.27 web:build:   [31mx[0m Expected ',', got 'lang'
+#14 41.27 web:build:     ,-[[36;1;4m/usr/src/app/apps/web/src/app/layout.tsx[0m:51:1]
+#14 41.27 web:build:  [2m48[0m |   children: React.ReactNode;
+#14 41.27 web:build:  [2m49[0m | }) {
+#14 41.27 web:build:  [2m50[0m |   return (
+#14 41.27 web:build:  [2m51[0m |     <<htmlhtml lang="en" className="scroll-smooth" suppressHydrationWarning>
+#14 41.27 web:build:     : [35;1m               ^^^^[0m
+#14 41.27 web:build:  [2m52[0m |       <<headhead>
+#14 41.27 web:build:  [2m53[0m |         <<scriptscript src="https://cdn.tailwindcss.com"></script>
+#14 41.27 web:build:  [2m54[0m |         <<linklink href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet" />
+#14 41.27 web:build:     `----
+#14 41.27 web:build: 
+#14 41.27 web:build: Caused by:
+#14 41.27 web:build:     Syntax Error
+#14 41.27 web:build: 
+#14 41.27 web:build: Import trace for requested module:
+#14 41.27 web:build: ./src/app/layout.tsx
+#14 41.27 web:build: 
+#14 41.29 web:build: 
+#14 41.29 web:build: > Build failed because of webpack errors
+#14 41.31 web:build:  ELIFECYCLE  Command failed with exit code 1.
+#14 41.35 web:build: ERROR: command finished with error: command (/usr/src/app/apps/web) /usr/local/bin/pnpm run build exited (1)
+#14 41.35 web#build: command (/usr/src/app/apps/web) /usr/local/bin/pnpm run build exited (1)
+#14 41.40 
+#14 41.40  Tasks:    2 successful, 3 total
+#14 41.40 Cached:    0 cached, 3 total
+#14 41.40   Time:    39.219s 
+#14 41.40 Failed:    web#build
+#14 41.40 
+#14 41.42  ERROR  run failed: command  exited (1)
+#14 41.61  ELIFECYCLE  Command failed with exit code 1.
+#14 ERROR: process "/bin/sh -c pnpm run build" did not complete successfully: exit code: 1
+------
+ > [build 4/4] RUN pnpm run build:
+41.35 web:build: ERROR: command finished with error: command (/usr/src/app/apps/web) /usr/local/bin/pnpm run build exited (1)
+41.35 web#build: command (/usr/src/app/apps/web) /usr/local/bin/pnpm run build exited (1)
+41.40 
+41.40  Tasks:    2 successful, 3 total
+41.40 Cached:    0 cached, 3 total
+41.40   Time:    39.219s 
+41.40 Failed:    web#build
+41.40 
+41.42  ERROR  run failed: command  exited (1)
+41.61  ELIFECYCLE  Command failed with exit code 1.
+------
+WARNING: current commit information was not captured by the build: failed to read current commit information with git rev-parse --is-inside-work-tree
+
+Dockerfile:12
+
+--------------------
+
+  10 |     # Removed --frozen-lockfile to allow pnpm to update the lockfile to match current package.json
+
+  11 |     RUN pnpm install
+
+  12 | >>> RUN pnpm run build
+
+  13 |     
+
+  14 |     # Production Stage
+
+--------------------
+
+failed to solve: process "/bin/sh -c pnpm run build" did not complete successfully: exit code: 1
+
+Verifying deployment...
+❌ Deployment Failed: System is not responding

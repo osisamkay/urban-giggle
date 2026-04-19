@@ -1,15 +1,15 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
     "declaration": true,
-    "declarationMap": true,
-    "composite": true
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["ES2020", "DOM"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../types" }
-  ]
+  "include": ["src"]
 }

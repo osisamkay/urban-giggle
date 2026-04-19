@@ -13,11 +13,17 @@ COPY apps/web/package.json ./apps/web/
 COPY packages/types/package.json ./packages/types/
 COPY packages/api-client/package.json ./packages/api-client/
 
-# Use hoisted node-linker to avoid symlink issues in Docker
-RUN echo "node-linker=hoisted" > .npmrc && pnpm install --frozen-lockfile
+# Install dependencies with shamefully-hoist (flat node_modules, workspace symlinks preserved)
+RUN echo "shamefully-hoist=true" > .npmrc && pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
+
+# Build args for Next.js public env vars (baked in at build time)
+ARG NEXT_PUBLIC_SUPABASE_URL=http://host.docker.internal:54331
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 # Build packages first, then web app
 RUN pnpm run build
@@ -32,10 +38,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy standalone output
+COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder /app/apps/web/.next/standalone ./
 COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder /app/apps/web/public ./apps/web/public
 
 USER nextjs
 

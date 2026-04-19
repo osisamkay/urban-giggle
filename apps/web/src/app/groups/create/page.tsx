@@ -83,7 +83,7 @@ export default function CreateGroupPage() {
 
             const groupData = {
                 product_id: 'placeholder-product-id', // Needs valid UUID or handle in backend
-                organizer_id: user.id,
+                organizer_id: user!.id,
                 title: data.title,
                 description: data.description,
                 price_tiers: priceTiers,

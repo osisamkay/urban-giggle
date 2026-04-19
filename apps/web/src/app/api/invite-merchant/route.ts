@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { email, businessName, firstName, lastName } = body;
 
-        console.log('[Invite Merchant] Admin', authResult.user.email, 'inviting:', email);
+        console.info('[Invite Merchant] Admin', authResult.user.email, 'inviting:', email);
 
         if (!email) {
             return NextResponse.json(
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log('[Invite Merchant] Service role key is configured, checking existing users...');
+        console.info('[Invite Merchant] Service role key is configured, checking existing users...');
 
         // Check if user already exists in auth
         const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
         // Send the invitation email via Supabase Auth
         const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/seller/onboarding`;
 
-        console.log('[Invite Merchant] Sending invitation to:', email);
-        console.log('[Invite Merchant] Redirect URL:', redirectUrl);
+        console.info('[Invite Merchant] Sending invitation to:', email);
+        console.info('[Invite Merchant] Redirect URL:', redirectUrl);
 
         const { data, error: authError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
             redirectTo: redirectUrl,
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log('[Invite Merchant] Invitation sent successfully:', data);
+        console.info('[Invite Merchant] Invitation sent successfully:', data);
 
         return NextResponse.json({
             success: true,

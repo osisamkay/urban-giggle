@@ -176,7 +176,7 @@ export function AddressSelection({ userId, selectedAddressId, onSelectAddress }:
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
                                 <select
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-meat-500"
-                                    value={newAddress.country}
+                                    value={newAddress.country ?? ''}
                                     onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
                                 >
                                     <option value="USA">United States</option>
@@ -190,7 +190,7 @@ export function AddressSelection({ userId, selectedAddressId, onSelectAddress }:
                                 id="is-default"
                                 type="checkbox"
                                 className="h-4 w-4 text-meat-600 focus:ring-meat-500 border-gray-300 rounded"
-                                checked={newAddress.is_default}
+                                checked={newAddress.is_default ?? false}
                                 onChange={(e) => setNewAddress({ ...newAddress, is_default: e.target.checked })}
                             />
                             <label htmlFor="is-default" className="ml-2 block text-sm text-gray-900">
