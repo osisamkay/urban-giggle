@@ -122,25 +122,18 @@ export class GroupsAPI {
 
   async joinGroup(groupId: string, quantity: number): Promise<ApiResponse<GroupParticipant>> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { data, error } = await this.supabase
-        .from('group_participants')
-        .insert({
-          group_id: groupId,
-          user_id: user.id,
-          quantity,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Update group quantities
-      await this.supabase.rpc('update_group_quantities', {
-        p_group_id: groupId,
+      const response = await fetch('/api/groups/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groupId, quantity }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to join group via API');
+      }
+
+      const data = await response.json();
 
       return {
         success: true,
@@ -158,21 +151,14 @@ export class GroupsAPI {
 
   async leaveGroup(groupId: string): Promise<ApiResponse<void>> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { error } = await this.supabase
-        .from('group_participants')
-        .delete()
-        .eq('group_id', groupId)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      // Update group quantities
-      await this.supabase.rpc('update_group_quantities', {
-        p_group_id: groupId,
+      const response = await fetch(`/api/groups/leave?groupId=${groupId}`, {
+        method: 'DELETE',
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to leave group via API');
+      }
 
       return { success: true };
     } catch (error) {

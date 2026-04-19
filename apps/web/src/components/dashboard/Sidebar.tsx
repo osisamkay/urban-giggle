@@ -44,7 +44,7 @@ export function DashboardSidebar() {
     }
 
     return (
-        <div className="w-64 bg-white border-r border-gray-200 min-h-[calc(100vh-64px)] hidden md:block">
+        <div className="w-64 bg-white border-r border-gray-200 h-[calc(100vh-64px)] overflow-y-auto hidden md:block">
             <div className="p-6">
                 {/* Section label */}
                 <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">

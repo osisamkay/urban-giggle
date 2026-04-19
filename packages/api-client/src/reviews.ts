@@ -35,34 +35,18 @@ export class ReviewsAPI {
     comment?: string;
   }): Promise<ApiResponse<Review>> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const response = await fetch('/api/reviews/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(review),
+      });
 
-      // Check if user has purchased the product
-      const { data: orders } = await this.supabase
-        .from('order_items')
-        .select('order_id')
-        .eq('product_id', review.productId);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create review via API');
+      }
 
-      const verified = orders && orders.length > 0;
-
-      const { data, error } = await this.supabase
-        .from('reviews')
-        .insert({
-          product_id: review.productId,
-          user_id: user.id,
-          rating: review.rating,
-          title: review.title,
-          comment: review.comment,
-          verified,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Update product rating
-      await this.updateProductRating(review.productId);
+      const data = await response.json();
 
       return {
         success: true,
@@ -112,22 +96,13 @@ export class ReviewsAPI {
 
   async deleteReview(reviewId: string): Promise<ApiResponse<void>> {
     try {
-      const { data } = await this.supabase
-        .from('reviews')
-        .select('product_id')
-        .eq('id', reviewId)
-        .single();
+      const response = await fetch(`/api/reviews/delete?id=${reviewId}`, {
+        method: 'DELETE',
+      });
 
-      const { error } = await this.supabase
-        .from('reviews')
-        .delete()
-        .eq('id', reviewId);
-
-      if (error) throw error;
-
-      // Update product rating
-      if (data) {
-        await this.updateProductRating(data.product_id);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete review via API');
       }
 
       return { success: true };

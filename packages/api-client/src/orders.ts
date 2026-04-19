@@ -14,40 +14,33 @@ export class OrdersAPI {
     total: number;
   }): Promise<ApiResponse<Order>> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      // Create order
-      const { data: orderData, error: orderError } = await this.supabase
-        .from('orders')
-        .insert({
-          buyer_id: user.id,
+      // Shift from direct Supabase insert to the secure API route
+      // This ensures atomic inventory decrements and rate limiting are applied
+      const response = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           seller_id: order.sellerId,
+          items: order.items.map(i => ({
+            product_id: i.productId,
+            quantity: i.quantity,
+            price_at_purchase: i.price
+          })),
           shipping_address_id: order.shippingAddressId,
           subtotal: order.subtotal,
           tax: order.tax,
           shipping: order.shipping,
           total: order.total,
-          status: 'PENDING',
-        })
-        .select()
-        .single();
+          // buyer_id is handled by the API route via auth session
+        }),
+      });
 
-      if (orderError) throw orderError;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create order via API');
+      }
 
-      // Create order items
-      const orderItems = order.items.map((item) => ({
-        order_id: orderData.id,
-        product_id: item.productId,
-        quantity: item.quantity,
-        price_at_purchase: item.price,
-      }));
-
-      const { error: itemsError } = await this.supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
+      const orderData = await response.json();
 
       return {
         success: true,

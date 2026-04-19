@@ -56,14 +56,39 @@ export async function POST(request: Request) {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
         console.error(`❌ Payment failed: ${paymentIntent.id}`);
 
-        // Update order status to CANCELLED
-        const { error } = await (supabaseAdmin as any)
+        // 1. ATOMIC STATE TRANSITION
+        // Only restore inventory if the order is still PENDING. 
+        // This prevents "Inventory Inflation" via replay attacks.
+        const { data: order, error: updateError } = await (supabaseAdmin as any)
           .from('orders')
           .update({ status: 'CANCELLED' })
-          .eq('payment_intent_id', paymentIntent.id);
+          .eq('payment_intent_id', paymentIntent.id)
+          .eq('status', 'PENDING') // Only update if it was pending
+          .select()
+          .single();
 
-        if (error) {
-          console.error('Failed to update order on payment failure:', error);
+        if (updateError || !order) {
+          console.log('Order already cancelled or not found. Skipping restoration.');
+          break;
+        }
+
+        // 2. Restore Inventory (now safe because state changed from PENDING -> CANCELLED)
+        const { data: items, error: itemsError } = await supabaseAdmin
+            .from('order_items')
+            .select('product_id, quantity')
+            .eq('order_id', order.id);
+
+        if (itemsError) {
+          console.error('Failed to fetch items for restoration:', itemsError);
+        } else if (items) {
+            for (const item of items) {
+              const { error: restoreError } = await (supabaseAdmin as any).rpc('restore_inventory', {
+                p_product_id: item.product_id,
+                p_quantity: item.quantity,
+              });
+              if (restoreError) console.error(`Failed to restore item ${item.product_id}:`, restoreError);
+            }
+            console.log(`✅ Inventory restored for order ${order.id}`);
         }
         break;
       }

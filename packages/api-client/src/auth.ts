@@ -99,7 +99,7 @@ export class AuthAPI {
 
       const { data, error } = await this.supabase
         .from('users')
-        .select('*')
+        .select('id, email, role, first_name, last_name, avatar_url')
         .eq('id', session.user.id)
         .single();
 
@@ -107,7 +107,7 @@ export class AuthAPI {
 
       return {
         success: true,
-        data: data as User,
+        data: data as unknown as User,
       };
     } catch (error) {
       return {

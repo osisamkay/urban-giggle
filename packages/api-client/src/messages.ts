@@ -33,13 +33,14 @@ export class MessagesAPI {
 
   async getMessages(conversationId: string): Promise<ApiResponse<Message[]>> {
     try {
-      const { data, error } = await this.supabase
-        .from('messages')
-        .select('*, sender:users(id, first_name, last_name, avatar_url)')
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
+      const response = await fetch(`/api/messages/get?conversationId=${conversationId}`);
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch messages via API');
+      }
+
+      const data = await response.json();
 
       return {
         success: true,
@@ -57,26 +58,18 @@ export class MessagesAPI {
 
   async sendMessage(conversationId: string, content: string): Promise<ApiResponse<Message>> {
     try {
-      const { data: { user } } = await this.supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const response = await fetch('/api/messages/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId, content }),
+      });
 
-      const { data, error } = await this.supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content,
-        })
-        .select()
-        .single();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send message via API');
+      }
 
-      if (error) throw error;
-
-      // Update conversation timestamp
-      await this.supabase
-        .from('conversations')
-        .update({ updated_at: new Date().toISOString() })
-        .eq('id', conversationId);
+      const data = await response.json();
 
       return {
         success: true,

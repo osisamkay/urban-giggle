@@ -1,0 +1,45 @@
+import { NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase/admin';
+import { requireAdmin } from '@/lib/supabase/server-auth';
+
+export async function PATCH(request: Request) {
+  try {
+    const adminResult = await requireAdmin();
+    if ('error' in adminResult) {
+      return NextResponse.json({ error: adminResult.error }, { status: adminResult.status });
+    }
+
+    const { sellerId, newStatus, newLevel } = await request.json();
+
+    if (!sellerId || !newStatus) {
+      return NextResponse.json({ error: 'sellerId and newStatus are required' }, { status: 400 });
+    }
+
+    // 1. Update the seller's verification status and level
+    const updatePayload: any = { kyc_status: newStatus };
+    if (newLevel) {
+      updatePayload.verification_level = newLevel;
+    }
+
+    const { data, error: updateError } = await supabaseAdmin
+      .from('seller_profiles')
+      .update(updatePayload)
+      .eq('id', sellerId)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    // 2. If approved, we might also want to update the user role in the users table
+    // (though they are already 'SELLER', we can add a 'VERIFIED_SELLER' role if desired)
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: `Seller has been updated to ${newStatus}`,
+      data 
+    });
+  } catch (e: any) {
+    console.error('Verify Seller Exception:', e);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
