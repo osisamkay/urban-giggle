@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
+
 export interface GroupAnalytics {
   group_id: string;
   views: number;
@@ -29,7 +31,7 @@ export class AnalyticsAPI {
 
     if (error) throw error;
 
-    return (data || []).map(item => ({
+    return (data || []).map((item: any) => ({
       group_id: item.group_id,
       views: item.views,
       joins: item.joins,

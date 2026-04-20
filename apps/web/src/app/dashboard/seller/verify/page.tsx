@@ -144,7 +144,7 @@ export default function VerificationCenter() {
                     desc="Gain instant trust with buyers in the marketplace." 
                   />
                   <BenefitItem 
-                    title, "Priority Placement" 
+                    title="Priority Placement"
                     desc="Appear higher in the 'Deal Finder' search results." 
                   />
                 </ul>

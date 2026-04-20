@@ -82,24 +82,24 @@ export default function TierUpgradePanel() {
               <li className="flex items-center gap-2">
                 <Check size={14} className="text-green-500" />
                 <span>Value Limit: ${plan.value_limit.toLocaleString()}</span>
-              </div>
+              </li>
               {plan.features.can_boost && (
                 <li className="flex items-center gap-2">
                   <Check size={14} className="text-green-500" />
                   <span>Promoted Groups (Boost)</span>
-                </div>
+                </li>
               )}
               {plan.features.analytics_access && (
                 <li className="flex items-center gap-2">
                   <Check size={14} className="text-green-500" />
                   <span>Advanced Demand Analytics</span>
-                </div>
+                </li>
               )}
               {plan.features.priority_support && (
                 <li className="flex items-center gap-2">
                   <Check size={14} className="text-green-500" />
                   <span>Priority Support Line</span>
-                </div>
+                </li>
               )}
             </ul>
 

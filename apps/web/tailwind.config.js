@@ -1,5 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  safelist: [
+    'bg-meat-600', 'bg-meat-700', 'text-white',
+    'hover:bg-meat-700', 'focus:ring-meat-500',
+    'bg-gray-200', 'bg-gray-300', 'hover:bg-gray-300', 'focus:ring-gray-500',
+    'bg-red-600', 'bg-red-700', 'hover:bg-red-700', 'focus:ring-red-500',
+  ],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',

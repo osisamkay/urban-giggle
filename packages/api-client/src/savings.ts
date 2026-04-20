@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
+
 export interface BuyerSavings {
   total_saved: number;
   total_spent: number;

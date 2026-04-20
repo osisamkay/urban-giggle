@@ -2,15 +2,19 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { requireAuth } from '@/lib/supabase/server-auth';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'ShareSteak <onboarding@resend.dev>';
-
 export async function POST(request: Request) {
   try {
     const authResult = await requireAuth();
     if ('error' in authResult) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
+
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json({ error: 'Email service not configured' }, { status: 503 });
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'ShareSteak <onboarding@resend.dev>';
 
     const { type, to, data } = await request.json();
 

@@ -31,11 +31,11 @@ export async function GET(request: Request) {
 
     let restoredCount = 0;
 
-    for (const order of expiredOrders) {
+    for (const order of expiredOrders as any[]) {
       // ATOMIC STATE TRANSITION: Mark as EXPIRED only if it is still PENDING
-      const { data: updatedOrder, error: updateError } = await supabaseAdmin
+      const { data: updatedOrder, error: updateError } = await (supabaseAdmin as any)
         .from('orders')
-        .update({ status: 'EXPIRED' } as any)
+        .update({ status: 'EXPIRED' })
         .eq('id', order.id)
         .eq('status', 'PENDING')
         .select()
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
       if (updateError || !updatedOrder) continue; // Already processed by webhook or another reaper run
 
       // 2. Get items for this order
-      const { data: items, error: itemsError } = await supabaseAdmin
+      const { data: items, error: itemsError } = await (supabaseAdmin as any)
         .from('order_items')
         .select('product_id, quantity')
         .eq('order_id', order.id);

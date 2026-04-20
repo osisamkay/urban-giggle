@@ -14,7 +14,8 @@ import {
   ArrowRight,
   Clock,
   Eye,
-  FileText
+  FileText,
+  ArrowUpRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -230,7 +231,7 @@ export default function AdminDashboard() {
                     <p className="font-semibold text-slate-900">{selectedMerchant.location}</p>
                   </div>
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <p className, "text-xs text-slate-500 mb-1">Compliance Status</p>
+                    <p className="text-xs text-slate-500 mb-1">Compliance Status</p>
                     <p className={`text-sm font-bold ${selectedMerchant.documents === 'Verified' ? 'text-emerald-600' : 'text-rose-600'}`}>
                       {selectedMerchant.documents}
                     </p>
@@ -273,8 +274,8 @@ export default function AdminDashboard() {
               </div>
             </motion.div>
           </div>
-        </div>
-      </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

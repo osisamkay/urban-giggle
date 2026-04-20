@@ -139,7 +139,13 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.39.0
         version: 2.80.0
+      stripe:
+        specifier: ^20.1.0
+        version: 20.1.0(@types/node@20.19.24)
     devDependencies:
+      '@types/node':
+        specifier: ^20.10.0
+        version: 20.19.24
       typescript:
         specifier: 5.8.3
         version: 5.8.3

@@ -45,9 +45,9 @@ describe('Integration Security Tests - Red Team', () => {
                 error: null
               })
             })
-          });
+          })
         }
-      };
+      }
       return (mockSupabase as any).from(''); // Fallback
     };
 

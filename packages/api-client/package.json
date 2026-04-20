@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@sharesteak/types": "file:../types",
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "stripe": "^20.1.0"
   },
   "devDependencies": {
+    "@types/node": "^20.10.0",
     "typescript": "5.8.3"
   }
 }
