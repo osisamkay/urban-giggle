@@ -1,10 +1,12 @@
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
+import { getStripe } from '@/lib/stripe';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  const stripe = getStripe();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const body = await request.text();
   const signature = request.headers.get('stripe-signature');

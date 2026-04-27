@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
+
+const RESEND_COOLDOWN_SECONDS = 30;
 
 function LoginForm() {
   const router = useRouter();
@@ -19,6 +21,35 @@ function LoginForm() {
   const [isMagicLink, setIsMagicLink] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
+  const cooldownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    cooldownTimerRef.current = setInterval(() => {
+      setResendCooldown((s) => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+    return () => {
+      if (cooldownTimerRef.current) clearInterval(cooldownTimerRef.current);
+    };
+  }, [resendCooldown]);
+
+  const startCooldown = () => setResendCooldown(RESEND_COOLDOWN_SECONDS);
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0 || resending) return;
+    setError('');
+    setResending(true);
+    try {
+      await signInWithMagicLink(email);
+      startCooldown();
+    } catch (err: any) {
+      setError(err?.message || 'Failed to resend code');
+    } finally {
+      setResending(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +59,7 @@ function LoginForm() {
       if (isMagicLink) {
         await signInWithMagicLink(email);
         setMagicLinkSent(true);
+        startCooldown();
       } else {
         await signIn(email, password);
 
@@ -104,12 +136,27 @@ function LoginForm() {
         <p className="text-sm text-gray-400">
           Or click the magic link in the email.
         </p>
-        <button
-          onClick={() => { setMagicLinkSent(false); setOtpCode(''); setError(''); }}
-          className="text-sm font-semibold text-meat-600 hover:text-meat-700 hover:underline"
-        >
-          Use a different email
-        </button>
+        <div className="flex flex-col gap-2 items-center">
+          <button
+            type="button"
+            onClick={handleResendOtp}
+            disabled={resendCooldown > 0 || resending}
+            className="text-sm font-semibold text-meat-600 hover:text-meat-700 hover:underline disabled:text-gray-400 disabled:no-underline disabled:cursor-not-allowed"
+          >
+            {resending
+              ? 'Resending...'
+              : resendCooldown > 0
+                ? `Resend code in ${resendCooldown}s`
+                : 'Resend code'}
+          </button>
+          <button
+            type="button"
+            onClick={() => { setMagicLinkSent(false); setOtpCode(''); setError(''); setResendCooldown(0); }}
+            className="text-sm font-semibold text-meat-600 hover:text-meat-700 hover:underline"
+          >
+            Use a different email
+          </button>
+        </div>
       </div>
     );
   }

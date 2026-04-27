@@ -23,9 +23,12 @@ function getSupabaseAdmin(): SupabaseClient<Database> {
     return _supabaseAdmin;
 }
 
-// Proxy that lazily initializes on first use
+// Proxy that lazily initializes on first use. Methods are bound to the underlying
+// client so `this` resolves correctly when callers do `supabaseAdmin.from(...)`.
 export const supabaseAdmin = new Proxy({} as SupabaseClient<Database>, {
     get(_target, prop) {
-        return (getSupabaseAdmin() as any)[prop];
+        const client = getSupabaseAdmin();
+        const value = (client as any)[prop];
+        return typeof value === 'function' ? value.bind(client) : value;
     }
 });

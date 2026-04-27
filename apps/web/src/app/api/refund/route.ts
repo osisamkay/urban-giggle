@@ -1,12 +1,13 @@
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { getStripe } from '@/lib/stripe';
 import { requireAuth } from '@/lib/supabase/server-auth';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   try {
+    const stripe = getStripe();
     const authResult = await requireAuth();
     if ('error' in authResult) {
       return NextResponse.json(

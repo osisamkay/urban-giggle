@@ -62,12 +62,11 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const data = await authApi.verifyOtp(email, token);
-          if (data.user) {
-            const profile = await authApi.getCurrentUserProfile();
-            set({ user: profile, isLoading: false });
-          } else {
-            set({ isLoading: false });
+          if (!data.user) {
+            throw new Error('Verification succeeded but no user was returned');
           }
+          const profile = await authApi.getCurrentUserProfile();
+          set({ user: profile, isLoading: false });
         } catch (error) {
           set({ isLoading: false });
           throw error;
