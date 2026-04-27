@@ -1,5 +1,5 @@
 -- Add stripe_account_id to profiles to support Stripe Connect
-ALTER TABLE profiles 
+ALTER TABLE seller_profiles
 ADD COLUMN IF NOT EXISTS stripe_account_id TEXT;
 
 -- Add platform_fee_percentage to a new global settings table for easy adjustment

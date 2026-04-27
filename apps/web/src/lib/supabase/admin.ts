@@ -1,17 +1,31 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+let _supabaseAdmin: SupabaseClient<Database> | null = null;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-    console.warn('Missing Supabase Service Key for admin client');
+function getSupabaseAdmin(): SupabaseClient<Database> {
+    if (_supabaseAdmin) return _supabaseAdmin;
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+        throw new Error('Missing Supabase URL or Service Role Key for admin client');
+    }
+
+    _supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    });
+
+    return _supabaseAdmin;
 }
 
-// Note: This client has admin privileges. Use with caution.
-export const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey || '', {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false
+// Proxy that lazily initializes on first use
+export const supabaseAdmin = new Proxy({} as SupabaseClient<Database>, {
+    get(_target, prop) {
+        return (getSupabaseAdmin() as any)[prop];
     }
 });

@@ -1,13 +1,11 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { requireAuth } from '@/lib/supabase/server-auth';
 import { checkRateLimit } from '@/lib/rateLimit';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2024-06-20' as Stripe.LatestApiVersion,
-});
-
 export async function POST(request: Request) {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
     try {
         // Rate limit: 10 payment intents per minute per IP
         const rateLimitResponse = checkRateLimit(request, { maxRequests: 10, windowMs: 60_000 });

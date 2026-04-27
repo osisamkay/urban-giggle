@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS seller_analytics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     seller_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    group_id UUID REFERENCES groups(id) ON DELETE CASCADE,
+    group_id UUID REFERENCES group_purchases(id) ON DELETE CASCADE,
     views INTEGER DEFAULT 0,
     joins INTEGER DEFAULT 0,
     revenue DECIMAL DEFAULT 0,
@@ -25,7 +25,7 @@ RETURNS VOID AS $$
 BEGIN
     INSERT INTO seller_analytics (seller_id, group_id, views)
     SELECT seller_id, id, 1 
-    FROM groups 
+    FROM group_purchases 
     WHERE id = target_group_id
     ON CONFLICT (group_id) 
     DO UPDATE SET views = seller_analytics.views + 1, updated_at = now();
@@ -37,7 +37,7 @@ CREATE OR REPLACE VIEW seller_revenue_velocity AS
 SELECT 
     date_trunc('day', updated_at) as day,
     SUM(revenue) as daily_revenue,
-    COUNT(DISTINCT group_id) as groups_filled
+    COUNT(DISTINCT group_id) as group_purchases_filled
 FROM seller_analytics
 WHERE status = 'FILLED'
 GROUP BY 1

@@ -26,6 +26,22 @@ function AuthCallbackContent() {
                     return;
                 }
 
+                // Check if we already have a session (e.g., from OTP verification)
+                const { data: { session: existingSession } } = await supabase.auth.getSession();
+                if (existingSession) {
+                    setStatus('Loading user profile...');
+                    await refreshUser();
+                    const user = useAuthStore.getState().user;
+                    if (user?.role === 'ADMIN') {
+                        router.replace('/admin');
+                    } else if (user?.role === 'SELLER') {
+                        router.replace('/seller/dashboard');
+                    } else {
+                        router.replace('/products');
+                    }
+                    return;
+                }
+
                 // Handle OAuth PKCE code exchange (for Google OAuth, etc.)
                 const code = searchParams.get('code');
                 if (code) {

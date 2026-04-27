@@ -10,7 +10,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/products';
 
-  const { signIn, signInWithGoogle, signInWithMagicLink, isLoading } = useAuthStore();
+  const { signIn, signInWithGoogle, signInWithMagicLink, verifyOtp, isLoading } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +18,7 @@ function LoginForm() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isMagicLink, setIsMagicLink] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +55,17 @@ function LoginForm() {
     }
   };
 
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    try {
+      await verifyOtp(email, otpCode);
+      router.push(redirect);
+    } catch (err: any) {
+      setError(err?.message || 'Invalid or expired code');
+    }
+  };
+
   if (magicLinkSent) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6 text-center animate-blob">
@@ -63,17 +75,37 @@ function LoginForm() {
           </svg>
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Check your email</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Enter verification code</h2>
           <p className="text-gray-500">
-            We've sent a magic link to <br />
+            We sent a 6-digit code to <br />
             <span className="font-semibold text-gray-900">{email}</span>
           </p>
         </div>
+        <form onSubmit={handleVerifyOtp} className="space-y-4">
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={otpCode}
+            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+            placeholder="000000"
+            className="block w-full text-center text-2xl tracking-[0.5em] font-mono py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-meat-500 focus:border-meat-500"
+            autoFocus
+          />
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <button
+            type="submit"
+            disabled={otpCode.length !== 6 || isLoading}
+            className="w-full py-3 bg-meat-600 text-white font-semibold rounded-xl hover:bg-meat-700 disabled:opacity-50 transition-colors"
+          >
+            {isLoading ? 'Verifying...' : 'Verify Code'}
+          </button>
+        </form>
         <p className="text-sm text-gray-400">
-          Click the link in the email to sign in.
+          Or click the magic link in the email.
         </p>
         <button
-          onClick={() => setMagicLinkSent(false)}
+          onClick={() => { setMagicLinkSent(false); setOtpCode(''); setError(''); }}
           className="text-sm font-semibold text-meat-600 hover:text-meat-700 hover:underline"
         >
           Use a different email

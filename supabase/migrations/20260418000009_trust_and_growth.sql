@@ -29,9 +29,9 @@ CREATE POLICY "Admins can manage all disputes"
 ON disputes FOR ALL 
 USING (
     EXISTS (
-        SELECT 1 FROM profiles 
-        WHERE profiles.id = auth.uid() 
-        AND profiles.role = 'ADMIN'
+        SELECT 1 FROM public.users 
+        WHERE users.id = auth.uid() 
+        AND users.role = 'ADMIN'
     )
 );
 

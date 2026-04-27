@@ -32,7 +32,7 @@ BEGIN
     -- This assumes we have original_price stored in the product/group table
     SELECT (g.original_price - g.group_price) * o.quantity 
     INTO saved_amount
-    FROM groups g
+    FROM group_purchasesg
     WHERE g.id = NEW.group_id;
 
     INSERT INTO buyer_savings_vault (user_id, total_saved, total_spent, groups_joined, carbon_offset_kg, last_updated)
@@ -59,5 +59,5 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_update_savings
 AFTER UPDATE ON orders
 FOR EACH ROW
-WHEN (OLD.status != 'COMPLETED' AND NEW.status = 'COMPLETED')
+WHEN (OLD.status != 'DELIVERED' AND NEW.status = 'DELIVERED')
 EXECUTE FUNCTION update_buyer_savings();

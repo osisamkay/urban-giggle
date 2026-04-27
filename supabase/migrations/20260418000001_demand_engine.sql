@@ -27,9 +27,9 @@ CREATE POLICY "Sellers can view all demand signals"
 ON demand_signals FOR SELECT 
 USING (
     EXISTS (
-        SELECT 1 FROM profiles 
-        WHERE profiles.id = auth.uid() 
-        AND profiles.role = 'SELLER'
+        SELECT 1 FROM public.users 
+        WHERE users.id = auth.uid() 
+        AND users.role = 'SELLER'
     )
 );
 

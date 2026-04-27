@@ -3,5 +3,6 @@
 **/.turbo
 .git
 *.md
-.env*.local
+**/.env*.local
+**/.env.development
 .env

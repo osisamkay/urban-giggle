@@ -44,7 +44,7 @@ WITH CHECK (
     AND 
     check_group_value_limit(
         (SELECT id FROM public.seller_profiles WHERE user_id = auth.uid()), 
-        (SELECT (target_quantity * price_tiers[1].price_per_unit) FROM public.group_purchases WHERE id = id) -- Simplified for logic
+        (SELECT (target_quantity * (price_tiers->0->>'price_per_unit')::numeric) FROM public.group_purchases WHERE id = id) -- Simplified for logic
     )
 );
 

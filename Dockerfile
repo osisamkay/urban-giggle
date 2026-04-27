@@ -19,11 +19,20 @@ RUN echo "shamefully-hoist=true" > .npmrc && pnpm install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Build args for Next.js public env vars (baked in at build time)
-ARG NEXT_PUBLIC_SUPABASE_URL=http://host.docker.internal:54331
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
-ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+# Build args for Next.js NEXT_PUBLIC_* vars only (these get inlined into the client bundle).
+# Server-only secrets (SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET)
+# are intentionally NOT here — they are injected at runtime via docker-compose's env_file,
+# and the server modules use lazy initialization so the build does not need them.
+ARG NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54331
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Convert ARGs to ENVs so Next.js picks them up during build
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 
 # Build packages first, then web app
 RUN pnpm run build

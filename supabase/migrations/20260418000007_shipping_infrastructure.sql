@@ -31,7 +31,7 @@ USING (
     EXISTS (
         SELECT 1 FROM orders 
         WHERE orders.id = shipments.order_id 
-        AND orders.user_id = auth.uid()
+        AND orders.buyer_id = auth.uid()
     )
 );
 
@@ -41,9 +41,8 @@ ON shipments FOR ALL
 USING (
     EXISTS (
         SELECT 1 FROM orders o
-        JOIN groups g ON o.group_id = g.id
-        WHERE o.id = shipments.order_id 
-        AND g.seller_id = auth.uid()
+        WHERE o.id = shipments.order_id
+        AND o.seller_id IN (SELECT id FROM seller_profiles WHERE user_id = auth.uid())
     )
 );
 

@@ -1,7 +1,7 @@
 -- Table for Group Promotions (Boosts)
 CREATE TABLE IF NOT EXISTS group_promotions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    group_id UUID REFERENCES groups(id) ON DELETE CASCADE,
+    group_id UUID REFERENCES group_purchases(id) ON DELETE CASCADE,
     seller_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     boost_expires_at TIMESTAMPTZ NOT NULL,
     cost DECIMAL NOT NULL,

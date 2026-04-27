@@ -81,6 +81,18 @@ export const authApi = {
     if (error) throw error;
   },
 
+  // Verify OTP code
+  verifyOtp: async (email: string, token: string) => {
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'email',
+    });
+
+    if (error) throw error;
+    return data;
+  },
+
   // Sign out
   signOut: async () => {
     const { error } = await supabase.auth.signOut();

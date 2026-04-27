@@ -17,17 +17,17 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Add subscription_status and subscription_end_date to profiles
-ALTER TABLE profiles 
+ALTER TABLE seller_profiles
 ADD COLUMN IF NOT EXISTS subscription_tier TEXT DEFAULT 'BASIC' REFERENCES subscription_plans(id),
 ADD COLUMN IF NOT EXISTS subscription_end_date TIMESTAMPTZ;
 
 -- Create a view for Admin to see total subscription revenue
 CREATE OR REPLACE VIEW admin_subscription_revenue AS
-SELECT 
+SELECT
     p.subscription_tier,
     COUNT(*) as seller_count,
     SUM(sp.monthly_price) as monthly_recurring_revenue
-FROM profiles p
+FROM seller_profiles p
 JOIN subscription_plans sp ON p.subscription_tier = sp.id
 WHERE p.subscription_end_date > now()
 GROUP BY p.subscription_tier;

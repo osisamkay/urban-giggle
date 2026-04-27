@@ -1,7 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!);
+}
 
 export interface SubscriptionPlan {
   id: string;
@@ -43,7 +45,7 @@ export class SubscriptionAPI {
     if (!plan) throw new Error('Plan not found');
 
     // 2. Create Stripe Checkout Session for a recurring subscription
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {

@@ -13,6 +13,7 @@ interface AuthState {
   setHasHydrated: (hydrated: boolean) => void;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithMagicLink: (email: string) => Promise<void>;
+  verifyOtp: (email: string, token: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signUp: (data: { email: string; password: string; firstName: string; lastName: string }) => Promise<void>;
   signOut: () => Promise<void>;
@@ -51,6 +52,22 @@ export const useAuthStore = create<AuthState>()(
         try {
           await authApi.signInWithMagicLink(email);
           set({ isLoading: false });
+        } catch (error) {
+          set({ isLoading: false });
+          throw error;
+        }
+      },
+
+      verifyOtp: async (email, token) => {
+        set({ isLoading: true });
+        try {
+          const data = await authApi.verifyOtp(email, token);
+          if (data.user) {
+            const profile = await authApi.getCurrentUserProfile();
+            set({ user: profile, isLoading: false });
+          } else {
+            set({ isLoading: false });
+          }
         } catch (error) {
           set({ isLoading: false });
           throw error;
