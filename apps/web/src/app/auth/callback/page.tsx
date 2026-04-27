@@ -35,7 +35,7 @@ function AuthCallbackContent() {
                     if (user?.role === 'ADMIN') {
                         router.replace('/admin');
                     } else if (user?.role === 'SELLER') {
-                        router.replace('/seller/dashboard');
+                        router.replace('/dashboard/seller');
                     } else {
                         router.replace('/products');
                     }
@@ -113,7 +113,7 @@ function AuthCallbackContent() {
                 } else if (user?.role === 'SELLER') {
                     setStatus('Welcome, Seller! Redirecting...');
                     await new Promise(resolve => setTimeout(resolve, 500));
-                    router.replace('/seller/dashboard');
+                    router.replace('/dashboard/seller');
                 } else {
                     setStatus('Welcome! Redirecting...');
                     await new Promise(resolve => setTimeout(resolve, 500));

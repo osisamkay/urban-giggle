@@ -68,7 +68,7 @@ function LoginForm() {
         if (user?.role === 'ADMIN') {
           router.push('/admin');
         } else if (user?.role === 'SELLER') {
-          router.push('/seller/dashboard');
+          router.push('/dashboard/seller');
         } else {
           router.push(redirect);
         }

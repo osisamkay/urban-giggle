@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { createServerSupabaseClient } from './server';
+import { getSupabaseUrl } from './config';
 import type { Database } from './database.types';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // User profile type for auth checks
@@ -29,7 +29,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         }
 
         // Create admin client to fetch user profile (with service role for full access)
-        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+        const supabaseAdmin = createClient(getSupabaseUrl(), supabaseServiceKey, {
             auth: {
                 autoRefreshToken: false,
                 persistSession: false

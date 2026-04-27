@@ -15,8 +15,9 @@ export function DashboardSidebar() {
     };
 
     // Determine context: are we in seller or admin section?
+    // Admin lives at /admin/*, seller lives under /dashboard/seller/*.
     const isSellerSection = pathname?.startsWith('/dashboard/seller');
-    const isAdminSection = pathname?.startsWith('/dashboard/admin');
+    const isAdminSection = pathname?.startsWith('/admin');
 
     const sellerNav = [
         { name: 'Seller Overview', href: '/dashboard/seller', icon: ChartBarIcon },
@@ -26,8 +27,11 @@ export function DashboardSidebar() {
     ];
 
     const adminNav = [
-        { name: 'Admin Overview', href: '/dashboard/admin', icon: ShieldCheckIcon },
-        { name: 'User Management', href: '/dashboard/admin/users', icon: UsersIcon },
+        { name: 'Admin Overview', href: '/admin', icon: ShieldCheckIcon },
+        { name: 'Merchants', href: '/admin/merchants', icon: ShieldCheckIcon },
+        { name: 'Orders', href: '/admin/orders', icon: ClipboardListIcon },
+        { name: 'Products', href: '/admin/products', icon: CubeIcon },
+        { name: 'User Management', href: '/admin/users', icon: UsersIcon },
     ];
 
     // Show seller nav in seller section, admin nav in admin section
@@ -78,7 +82,7 @@ export function DashboardSidebar() {
                         </h2>
                         {isSellerSection ? (
                             <Link
-                                href="/dashboard/admin"
+                                href="/admin"
                                 className="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
                             >
                                 <ShieldCheckIcon className="mr-3 h-5 w-5 text-gray-400" />

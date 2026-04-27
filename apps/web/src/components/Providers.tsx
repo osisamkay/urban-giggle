@@ -16,15 +16,21 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     if (initialized.current) return;
     initialized.current = true;
 
-    // Initial auth check
+    // Initial auth check. We must reconcile the persisted Zustand user with
+    // Supabase's actual session — otherwise a stale localStorage entry can make
+    // the UI behave as if logged in while the middleware (which reads the
+    // session cookie) sees nothing and redirects to /login.
     const initAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
           await refreshUser();
+        } else {
+          setUser(null);
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
+        setUser(null);
       } finally {
         // Always set loading to false after initial check
         setLoading(false);

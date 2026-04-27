@@ -53,7 +53,7 @@ export function Navbar() {
 
   // Admin link only for ADMIN role, not in dashboard
   if (user?.role === 'ADMIN' && !isDashboard) {
-    navLinks.push({ href: '/dashboard/admin', label: 'Admin' });
+    navLinks.push({ href: '/admin', label: 'Admin' });
   }
 
   // In dashboard, show minimal nav — just store link
@@ -61,7 +61,7 @@ export function Navbar() {
     navLinks.push({ href: '/products', label: 'Store' });
     navLinks.push({ href: '/dashboard/seller', label: 'Dashboard' });
     if (user?.role === 'ADMIN') {
-      navLinks.push({ href: '/dashboard/admin', label: 'Admin' });
+      navLinks.push({ href: '/admin', label: 'Admin' });
     }
   }
 

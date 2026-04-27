@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { 
-  ShoppingBag, 
-  Trophy, 
-  Package, 
-  Clock, 
-  ChevronRight, 
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
+import {
+  ShoppingBag,
+  Trophy,
+  Package,
+  Clock,
+  ChevronRight,
   Sparkles,
   ArrowUpRight,
   Bell
@@ -30,7 +32,22 @@ const MOCK_ACTIVE_ORDERS = [
 ];
 
 export default function BuyerDashboard() {
+  const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+  const hasHydrated = useAuthStore((s) => s.hasHydrated);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Send admins and sellers to their own dashboards. Wait for the auth store to
+  // finish hydrating so we don't redirect off the page during the brief window
+  // when persisted state hasn't loaded yet.
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (user?.role === 'ADMIN') {
+      router.replace('/admin');
+    } else if (user?.role === 'SELLER') {
+      router.replace('/dashboard/seller');
+    }
+  }, [hasHydrated, user, router]);
 
   useEffect(() => {
     // Simulate loading state for a smooth transition

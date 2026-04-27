@@ -2,9 +2,10 @@
 // For now, creates notifications in DB that can trigger email via Supabase hooks
 
 import { createClient } from '@supabase/supabase-js';
+import { getSupabaseUrl } from './supabase/config';
 
 const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  getSupabaseUrl(),
   process.env.SUPABASE_SERVICE_ROLE_KEY || '',
   { auth: { autoRefreshToken: false, persistSession: false } }
 );

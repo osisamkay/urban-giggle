@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getStripe } from '@/lib/stripe';
+import { getSupabaseUrl } from '@/lib/supabase/config';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,7 +9,7 @@ export async function POST(req: Request) {
   try {
     const stripe = getStripe();
     const { groupId, userId, quantity } = await req.json();
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const supabase = createClient(getSupabaseUrl(), process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
     // 1. Fetch Group and Seller Details
     const { data: group, error: groupError } = await supabase

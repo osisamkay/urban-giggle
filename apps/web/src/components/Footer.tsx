@@ -141,7 +141,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/seller/dashboard" className="text-sm text-gray-600 hover:text-meat-600 transition-colors">
+                <Link href="/dashboard/seller" className="text-sm text-gray-600 hover:text-meat-600 transition-colors">
                   Seller Dashboard
                 </Link>
               </li>

@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/supabase/server-auth';
 import { createClient } from '@supabase/supabase-js';
+import { getSupabaseUrl } from '@/lib/supabase/config';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // Admin-only API to fetch merchants with stats
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Create admin client to bypass RLS
-        const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+        const supabaseAdmin = createClient(getSupabaseUrl(), supabaseServiceKey, {
             auth: { autoRefreshToken: false, persistSession: false }
         });
 
